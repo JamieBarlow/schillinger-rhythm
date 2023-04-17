@@ -66,25 +66,25 @@ function setup() {
 
     beatLength = 16;
     numInstruments = 3;
-    cellWidth = width/beatLength;
+    cellWidth = width / beatLength;
     cursorPos = 0;
 
-    hh = loadSound('assets/MPC60/CH 909 A MPC60 07.wav', () => {});  // return to this callback later
-    snare = loadSound('assets/MPC60/Snare Wood Tail Short MPC60 13.wav', () => {});  // return to this callback later
-    bd = loadSound('assets/MPC60/BD Club Pressure MPC60 11.wav', () => {});  // return to this callback later
+    hh = loadSound('assets/MPC60/CH 909 A MPC60 07.wav', () => { });  // return to this callback later
+    snare = loadSound('assets/MPC60/Snare Wood Tail Short MPC60 13.wav', () => { });  // return to this callback later
+    bd = loadSound('assets/MPC60/BD Club Pressure MPC60 11.wav', () => { });  // return to this callback later
 
-    hhPat = [0, 1, 0, 1, 0, 0, 1, 1];
-    snarePat = [0, 0, 0, 0, 1, 0, 0, 0];
-    bdPat = [1, 0, 0, 0, 1, 0, 0, 0];
+    hhPat = [0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1];
+    snarePat = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0];
+    bdPat = [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0];
     createPlayhead();
     hhPhrase = new p5.Phrase('hh', (time) => {
         hh.play(time);
         // console.log(time);
-    }, hhPat); 
+    }, hhPat);
     snarePhrase = new p5.Phrase('snare', (time) => {
         snare.play(time);
         // console.log(time);
-    }, snarePat); 
+    }, snarePat);
     bdPhrase = new p5.Phrase('bd', (time) => {
         bd.play(time);
         // console.log(time);
@@ -99,7 +99,7 @@ function setup() {
 
     bpmControl = createSlider(30, 300, 120, 1);
     bpmControl.position(10, 70);
-    bpmControl.input(() => {drums.setBPM(bpmControl.value())});
+    bpmControl.input(() => { drums.setBPM(bpmControl.value()) });
 
     drums.setBPM('120');
     drawMatrix();
@@ -121,8 +121,8 @@ function keyPressed() {
 }
 
 function canvasPressed() {
-    let rowClicked = floor(numInstruments*mouseY/height);
-    let indexClicked = floor(beatLength*mouseX/width);
+    let rowClicked = floor(numInstruments * mouseY / height);
+    let indexClicked = floor(beatLength * mouseX / width);
     if (rowClicked === 0) {
         console.log('first row ' + indexClicked);
         hhPat[indexClicked] = invert(hhPat[indexClicked]);
@@ -147,18 +147,18 @@ function drawMatrix() {
         line(i * cellWidth, 0, i * cellWidth, height);
     }
     for (let i = 0; i < 4; i++) {
-        line(0, i * height/numInstruments, width, i * height/numInstruments);
+        line(0, i * height / numInstruments, width, i * height / numInstruments);
     }
     noStroke();
     for (let i = 0; i < beatLength; i++) {
         if (hhPat[i] === 1) {
-            ellipse(i*cellWidth + 0.5*cellWidth, 0.5*cellWidth, 10);
+            ellipse(i * cellWidth + 0.5 * cellWidth, 0.5 * cellWidth, 10);
         }
-        if (snarePat[i] ===1) {
-            ellipse(i*cellWidth + 0.5*cellWidth, 1.5*cellWidth, 10);
+        if (snarePat[i] === 1) {
+            ellipse(i * cellWidth + 0.5 * cellWidth, 1.5 * cellWidth, 10);
         }
         if (bdPat[i] === 1) {
-            ellipse(i*cellWidth + 0.5*cellWidth, 2.5*cellWidth, 10);
+            ellipse(i * cellWidth + 0.5 * cellWidth, 2.5 * cellWidth, 10);
         }
     }
 }
@@ -177,12 +177,15 @@ function createPlayhead() {
 
 function sequence(time, beatIndex) {
     console.log(beatIndex);
-    drawMatrix();
-    drawPlayhead(beatIndex);
+    setTimeout(() => {
+        drawMatrix();
+        drawPlayhead(beatIndex);
+    }, time * 1000);
+
 }
 
 function drawPlayhead(beatIndex) {
     stroke('red');
     fill(255, 0, 0, 30);
-    rect((beatIndex - 1)*cellWidth, 0, cellWidth, height);
+    rect((beatIndex - 1) * cellWidth, 0, cellWidth, height);
 }
