@@ -49,14 +49,25 @@ function updateDevices(event) {
 // p5 sketch setup
 function setup() {
     createCanvas(400, 400);
+    hh = loadSound('assets/MPC60/CH 909 A MPC60 07.wav', () => {drums.loop()});  // return to this callback later
+    // snare = loadSound('assets/MPC60/Snare Wood Tail Short MPC60 13.wav', () => {drums.loop()});  // return to this callback later
+    // bd = loadSound('assets/MPC60/BD Club Pressure MPC60 11.wav', () => {drums.loop()});  // return to this callback later
+
+    hhPat = [1, 0, 1, 0, 1, 1, 1, 0];
+    hhPhrase = new p5.Phrase('hh', (time) => {
+        hh.play(time);
+        console.log(time);
+    }, hhPat);    // return to this callback later
+    drums = new p5.Part();
+    drums.addPhrase(hhPhrase);
 }
 
 function draw() {
     background(220);
 }
 
-let hh;
-let hPat;  // hihat pattern. Will be an array of numbers (1 = on-note, 0 = rest)
-let hPhrase;  // defines how the hihat pattern is interpreted
+// instrument parts
+let bd, snare, hh;           // instrument. This serves as a container that will hold a sound source.
+let bdPat, snarePat, hhPat;  // pattern. Will be an array of numbers (1 = on-note, 0 = rest)
+let bdPhrase, snarePhrase, hhPhrase;  // defines how the pattern is interpreted
 let drums;  // full drum part. We will attach the phrase to the part, which will serve as our transport to drive the phrase.
-
