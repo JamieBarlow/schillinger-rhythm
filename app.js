@@ -45,3 +45,13 @@ function updateDevices(event) {
     console.log(`Name: ${event.port.name}, Brand: ${event.port.manufacturer}, State: ${event.port.state}, Type: ${event.port.type}`);
 }
 
+
+// p5 sketch
+
+function setup() {
+    createCanvas(400, 400);
+}
+
+function draw() {
+    background(220);
+}
