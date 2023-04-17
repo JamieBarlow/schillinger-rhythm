@@ -55,10 +55,13 @@ let bpmControl;
 let beatLength;
 let cellWidth;
 let numInstruments;
+let cnv;
 
 // p5 sketch setup
 function setup() {
-    createCanvas(320, 60);
+    cnv = createCanvas(320, 60);
+    cnv.mousePressed(canvasPressed);
+
     beatLength = 16;
     numInstruments = 3;
     cellWidth = width/beatLength;
@@ -94,7 +97,42 @@ function setup() {
     bpmControl.input(() => {drums.setBPM(bpmControl.value())});
 
     drums.setBPM('120');
+    drawMatrix();
+}
 
+// Toggle drum loop on pressing spacebar
+function keyPressed() {
+    if (key === " ") {
+        if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
+            if (!drums.isPlaying) {
+                drums.loop();
+            } else {
+                drums.stop();
+            }
+        } else {
+            console.log('Samples have not loaded yet, please wait')
+        }
+    }
+}
+
+function canvasPressed() {
+    let rowClicked = floor(numInstruments*mouseY/height);
+    let indexClicked = floor(beatLength*mouseX/width);
+    if (rowClicked === 0) {
+        console.log('first row ' + indexClicked);
+        hhPat[indexClicked] = invert(hhPat[indexClicked]);
+    } else if (rowClicked === 1) {
+        console.log('second row ' + indexClicked);
+        snarePat[indexClicked] = invert(snarePat[indexClicked]);
+    } else if (rowClicked === 2) {
+        console.log('third row ' + indexClicked);
+        bdPat[indexClicked] = invert(bdPat[indexClicked]);
+    }
+    drawMatrix();
+}
+
+// Function for drawing sequencer grid. Refreshes each time you click a cell with the canvasPressed() function
+function drawMatrix() {
     background(80);
     stroke('gray');
     strokeWeight(2);
@@ -119,17 +157,7 @@ function setup() {
     }
 }
 
-// Toggle drum loop on pressing spacebar
-function keyPressed() {
-    if (key === " ") {
-        if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
-            if (!drums.isPlaying) {
-                drums.loop();
-            } else {
-                drums.stop();
-            }
-        } else {
-            console.log('Samples have not loaded yet, please wait')
-        }
-    }
+// Reverses / toggles the state of a sample - either '1' (active) or '0' (inactive)
+function invert(bitInput) {
+    return bitInput === 1 ? 0 : 1;
 }
