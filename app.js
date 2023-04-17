@@ -110,6 +110,7 @@ function keyPressed() {
     if (key === " ") {
         if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
             if (!drums.isPlaying) {
+                drums.metro.metroTicks = 0;
                 drums.loop();
             } else {
                 drums.stop();
@@ -177,11 +178,11 @@ function createPlayhead() {
 
 function sequence(time, beatIndex) {
     console.log(beatIndex);
+    // Synchronising playhead with beat by delaying playhead. By default this is out of sync because the callback runs ahead of the beat
     setTimeout(() => {
         drawMatrix();
         drawPlayhead(beatIndex);
-    }, time * 1000);
-
+    }, time * 1000);                                // 'time' method returns time in seconds, so converting to ms
 }
 
 function drawPlayhead(beatIndex) {
