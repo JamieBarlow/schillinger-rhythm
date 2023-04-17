@@ -56,6 +56,8 @@ let beatLength;
 let cellWidth;
 let numInstruments;
 let cnv;
+let playhead = [];
+let cursorPos;
 
 // p5 sketch setup
 function setup() {
@@ -65,6 +67,7 @@ function setup() {
     beatLength = 16;
     numInstruments = 3;
     cellWidth = width/beatLength;
+    cursorPos = 0;
 
     hh = loadSound('assets/MPC60/CH 909 A MPC60 07.wav', () => {});  // return to this callback later
     snare = loadSound('assets/MPC60/Snare Wood Tail Short MPC60 13.wav', () => {});  // return to this callback later
@@ -73,24 +76,26 @@ function setup() {
     hhPat = [0, 1, 0, 1, 0, 0, 1, 1];
     snarePat = [0, 0, 0, 0, 1, 0, 0, 0];
     bdPat = [1, 0, 0, 0, 1, 0, 0, 0];
+    createPlayhead();
     hhPhrase = new p5.Phrase('hh', (time) => {
         hh.play(time);
-        console.log(time);
+        // console.log(time);
     }, hhPat); 
     snarePhrase = new p5.Phrase('snare', (time) => {
         snare.play(time);
-        console.log(time);
+        // console.log(time);
     }, snarePat); 
     bdPhrase = new p5.Phrase('bd', (time) => {
         bd.play(time);
-        console.log(time);
-    }, bdPat); 
+        // console.log(time);
+    }, bdPat);
 
     drums = new p5.Part();
 
     drums.addPhrase(hhPhrase);
     drums.addPhrase(snarePhrase);
     drums.addPhrase(bdPhrase);
+    drums.addPhrase('seq', sequence, playhead)
 
     bpmControl = createSlider(30, 300, 120, 1);
     bpmControl.position(10, 70);
@@ -136,6 +141,7 @@ function drawMatrix() {
     background(80);
     stroke('gray');
     strokeWeight(2);
+    fill('white');
     for (let i = 0; i < beatLength + 1; i++) {
         // startx, starty, endx, endy
         line(i * cellWidth, 0, i * cellWidth, height);
@@ -160,4 +166,23 @@ function drawMatrix() {
 // Reverses / toggles the state of a sample - either '1' (active) or '0' (inactive)
 function invert(bitInput) {
     return bitInput === 1 ? 0 : 1;
+}
+
+// Create an array of incrementing numbers representing the steps of the playhead
+function createPlayhead() {
+    for (let i = 0; i < beatLength; i++) {
+        playhead.push(i + 1);
+    }
+}
+
+function sequence(time, beatIndex) {
+    console.log(beatIndex);
+    drawMatrix();
+    drawPlayhead(beatIndex);
+}
+
+function drawPlayhead(beatIndex) {
+    stroke('red');
+    fill(255, 0, 0, 30);
+    rect((beatIndex - 1)*cellWidth, 0, cellWidth, height);
 }
