@@ -46,8 +46,7 @@ function updateDevices(event) {
 }
 
 
-// p5 sketch
-
+// p5 sketch setup
 function setup() {
     createCanvas(400, 400);
 }
@@ -55,3 +54,9 @@ function setup() {
 function draw() {
     background(220);
 }
+
+let hh;
+let hPat;  // hihat pattern. Will be an array of numbers (1 = on-note, 0 = rest)
+let hPhrase;  // defines how the hihat pattern is interpreted
+let drums;  // full drum part. We will attach the phrase to the part, which will serve as our transport to drive the phrase.
+
