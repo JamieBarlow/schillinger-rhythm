@@ -49,21 +49,46 @@ function updateDevices(event) {
 // p5 sketch setup
 function setup() {
     createCanvas(400, 400);
-    hh = loadSound('assets/MPC60/CH 909 A MPC60 07.wav', () => {drums.loop()});  // return to this callback later
-    // snare = loadSound('assets/MPC60/Snare Wood Tail Short MPC60 13.wav', () => {drums.loop()});  // return to this callback later
-    // bd = loadSound('assets/MPC60/BD Club Pressure MPC60 11.wav', () => {drums.loop()});  // return to this callback later
+    hh = loadSound('assets/MPC60/CH 909 A MPC60 07.wav', () => {});  // return to this callback later
+    snare = loadSound('assets/MPC60/Snare Wood Tail Short MPC60 13.wav', () => {});  // return to this callback later
+    bd = loadSound('assets/MPC60/BD Club Pressure MPC60 11.wav', () => {});  // return to this callback later
 
-    hhPat = [1, 0, 1, 0, 1, 1, 1, 0];
+    hhPat = [0, 1, 0, 1, 0, 0, 1, 1];
+    snarePat = [0, 0, 0, 0, 1, 0, 0, 0];
+    bdPat = [1, 0, 0, 0, 1, 0, 0, 0];
     hhPhrase = new p5.Phrase('hh', (time) => {
         hh.play(time);
         console.log(time);
-    }, hhPat);    // return to this callback later
+    }, hhPat); 
+    snarePhrase = new p5.Phrase('snare', (time) => {
+        snare.play(time);
+        console.log(time);
+    }, snarePat); 
+    bdPhrase = new p5.Phrase('bd', (time) => {
+        bd.play(time);
+        console.log(time);
+    }, bdPat); 
+
     drums = new p5.Part();
+
     drums.addPhrase(hhPhrase);
+    drums.addPhrase(snarePhrase);
+    drums.addPhrase(bdPhrase);
 }
 
-function draw() {
-    background(220);
+// Toggle drum loop on pressing spacebar
+function keyPressed() {
+    if (key === " ") {
+        if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
+            if (!drums.isPlaying) {
+                drums.loop();
+            } else {
+                drums.stop();
+            }
+        } else {
+            console.log('Samples have not loaded yet, please wait')
+        }
+    }
 }
 
 // instrument parts
