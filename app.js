@@ -111,6 +111,7 @@ function keyPressed() {
         if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
             if (!drums.isPlaying) {
                 drums.metro.metroTicks = 0;
+                context.resume().then(() => {});
                 drums.loop();
             } else {
                 drums.stop();
@@ -119,6 +120,12 @@ function keyPressed() {
             console.log('Samples have not loaded yet, please wait')
         }
     }
+}
+
+// Setup which fixes 'The AudioContext was not allowed to start' permissions issue. See keyPressed() function which resumes context
+let context;
+window.onload = function() {
+    context = new AudioContext();
 }
 
 function canvasPressed() {
