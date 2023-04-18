@@ -125,7 +125,7 @@ function keyPressed() {
 
 // Setup which fixes 'The AudioContext was not allowed to start' permissions issue. See keyPressed() function which resumes context
 let context;
-window.onload = function() {
+window.onload = function () {
     context = new AudioContext();
 }
 
@@ -199,14 +199,27 @@ function drawPlayhead(beatIndex) {
     rect((beatIndex - 1) * cellWidth, 0, cellWidth, height);
 }
 
-function convertPattern(ptn) {
-    const outputPtn = [];
-  
+/* This function allows you to input an array of numbers to convert to a beat pattern. If you enter the boolean value true for the second argument, 
+the pattern will add an extra beat to create a regular meter */
+function convertPattern(ptn, chooseRegular) {
+    let outputPtn = [];
     for (let i = 0; i < ptn.length; i++) {
-      if (ptn[i] !== 0) {
-          const noteLength = new Array(ptn[i] - 1).fill('0');
-              outputPtn.push('1', ...noteLength);
-          }
+        if (ptn[i] !== 0) {
+            const noteLength = new Array(ptn[i] - 1).fill(0);
+            outputPtn.push(1, ...noteLength);
+        }
     }
+    if (chooseRegular === true && isIrregular(ptn) === true) {
+        outputPtn.push(0);
+    }
+    console.log(outputPtn);
     return outputPtn;
-  }
+}
+
+// If the pattern doesn't contain an even number of beats, this function returns true
+function isIrregular(ptn) {
+    const ptnLength = ptn.reduce((a, b) => a + b);
+    return (ptnLength % 2 !== 0) ? true : false;
+}
+
+convertPattern([1, 0, 2, 4, 6], true);
