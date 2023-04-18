@@ -198,3 +198,14 @@ function drawPlayhead(beatIndex) {
     fill(255, 0, 0, 30);
     rect((beatIndex - 1) * cellWidth, 0, cellWidth, height);
 }
+
+function convertPattern(ptn) {
+    const outputPtn = [];
+  
+    for (let i = 0; i < ptn.length; i++) {
+      const noteLength = new Array(ptn[i] - 1).fill('0');
+      outputPtn.push('1', ...noteLength);
+    }
+  
+    return outputPtn;
+  }
