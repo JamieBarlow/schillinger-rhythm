@@ -111,8 +111,9 @@ function keyPressed() {
         if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
             if (!drums.isPlaying) {
                 drums.metro.metroTicks = 0;
-                context.resume().then(() => {});
-                drums.loop();
+                context.resume().then(() => {
+                    drums.loop();
+                });
             } else {
                 drums.stop();
             }
