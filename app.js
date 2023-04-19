@@ -140,6 +140,25 @@ window.onload = function () {
     context = new AudioContext();
 }
 
+// Toggle drum loop on clicking start button
+window.addEventListener('DOMContentLoaded', function () {
+    const startBtn = document.querySelector('#startBtn');
+    startBtn.addEventListener('click', function () {
+        if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
+            if (!drums.isPlaying) {
+                drums.metro.metroTicks = 0;
+                context.resume().then(() => {
+                    drums.loop();
+                });
+            } else {
+                drums.stop();
+            }
+        } else {
+            console.log('Samples have not loaded yet, please wait')
+        }
+    })
+});
+
 function canvasPressed() {
     let rowClicked = floor(numInstruments * mouseY / height);
     let indexClicked = floor(beatLength * mouseX / width);
