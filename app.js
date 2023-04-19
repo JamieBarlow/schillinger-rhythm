@@ -121,46 +121,40 @@ function setup() {
 // Toggle drum loop on pressing spacebar
 function keyPressed() {
     if (key === " ") {
-        if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
-            if (!drums.isPlaying) {
-                userStartAudio();
-                drums.metro.metroTicks = 0;
-                context.resume().then(() => {
-                    drums.loop();
-                });
-            } else {
-                drums.stop();
-            }
-        } else {
-            console.log('Samples have not loaded yet, please wait')
-        }
+        startSequence();
     }
 }
 
 let context;
+
 // Toggle drum loop on clicking start button
 window.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.querySelector('#startBtn');
     startBtn.addEventListener('click', () => {
-        context = new AudioContext();
-        context.onstatechange = function () {
-            console.log(context.state);
-        }
-        if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
-            if (!drums.isPlaying) {
-                drums.metro.metroTicks = 0;
-                userStartAudio();                                                  // required to ensure Audio Context is enabled via user prompt
-                drums.loop();
-                startBtn.textContent = 'Stop';
-            } else {
-                drums.stop();
-                startBtn.textContent = 'Play';
-            }
-        } else {
-            console.log('Samples have not loaded yet, please wait')
-        }
+        startSequence();
     })
 });
+
+function startSequence() {
+    context = new AudioContext();
+    context.onstatechange = function () {
+        console.log(context.state);
+    }
+    if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
+        if (!drums.isPlaying) {
+            drums.metro.metroTicks = 0;
+            userStartAudio();                                                  // required to ensure Audio Context is enabled via user prompt
+            drums.loop();
+            startBtn.textContent = 'Stop';
+        } else {
+            drums.stop();
+            startBtn.textContent = 'Play';
+        }
+    } else {
+        console.log('Samples have not loaded yet, please wait')
+    }
+}
+
 
 function canvasPressed() {
     let rowClicked = floor(numInstruments * mouseY / height);
