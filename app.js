@@ -63,7 +63,7 @@ pattern = [1, 0, 5, 4, 5];
 
 // p5 sketch setup
 function setup() {
-    cnv = createCanvas(320, 60);
+    cnv = createCanvas(320, 80);
     cnv.mousePressed(canvasPressed);
 
     hh = loadSound('assets/MPC60/CH 909 A MPC60 07.wav', () => { });  // return to this callback later
@@ -71,9 +71,9 @@ function setup() {
     bd = loadSound('assets/MPC60/BD Club Pressure MPC60 11.wav', () => { });  // return to this callback later
     pulse = loadSound('assets/DMX/CH Acc DMX 21.wav', () => { });
 
-    hhPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    beatLength = hhPat.length;
     snarePat = convertPattern(pattern, true);
+    beatLength = snarePat.length;
+    hhPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     bdPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     pulsePat = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,];
 
@@ -104,12 +104,12 @@ function setup() {
 
     drums.addPhrase(hhPhrase);
     drums.addPhrase(snarePhrase);
-    drums.addPhrase(bdPhrase);
     drums.addPhrase(pulsePhrase);
+    drums.addPhrase(bdPhrase);
     drums.addPhrase('seq', sequence, playhead)
 
     bpmControl = createSlider(30, 300, 120, 1);
-    bpmControl.position(10, 70);
+    bpmControl.position(10, 100);
     bpmControl.input(() => { drums.setBPM(bpmControl.value()) });
 
     drums.setBPM('120');
@@ -151,6 +151,9 @@ function canvasPressed() {
         snarePat[indexClicked] = invert(snarePat[indexClicked]);
     } else if (rowClicked === 2) {
         console.log('third row ' + indexClicked);
+        pulsePat[indexClicked] = invert(pulsePat[indexClicked]);
+    } else if (rowClicked === 3) {
+        console.log('fourth row ' + indexClicked);
         bdPat[indexClicked] = invert(bdPat[indexClicked]);
     }
     drawMatrix();
@@ -162,14 +165,17 @@ function drawMatrix() {
     stroke('gray');
     strokeWeight(2);
     fill('white');
+    // Draw column grid lines
     for (let i = 0; i < beatLength + 1; i++) {
         // startx, starty, endx, endy
         line(i * cellWidth, 0, i * cellWidth, height);
     }
+    // Draw row grid lines
     for (let i = 0; i < 4; i++) {
         line(0, i * height / numInstruments, width, i * height / numInstruments);
     }
     noStroke();
+    // Drawing circles in column for pattern (updated with canvasPressed() function when user clicks)
     for (let i = 0; i < beatLength; i++) {
         if (hhPat[i] === 1) {
             ellipse(i * cellWidth + 0.5 * cellWidth, 0.5 * cellWidth, 10);
@@ -177,8 +183,11 @@ function drawMatrix() {
         if (snarePat[i] === 1) {
             ellipse(i * cellWidth + 0.5 * cellWidth, 1.5 * cellWidth, 10);
         }
-        if (bdPat[i] === 1) {
+        if (pulsePat[i] === 1) {
             ellipse(i * cellWidth + 0.5 * cellWidth, 2.5 * cellWidth, 10);
+        }
+        if (bdPat[i] === 1) {
+            ellipse(i * cellWidth + 0.5 * cellWidth, 3.5 * cellWidth, 10);
         }
     }
 }
