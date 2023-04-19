@@ -9,10 +9,29 @@
     <script src="app.js"></script>
     <script src="p5.min.js"></script>
     <script src="p5.sound.js"></script>
+    <script src="https://kit.fontawesome.com/762a7ebf5f.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div id="startBtn"><button>Play</button></div>
+    <div>
+        <label for="numInput">Add a number here (e.g. 1240652)</label>
+        <input type="number" id="numInput">
+        <button id="numBtn" onclick="applyRhythm()">Add</button>
+    </div>
+    <div id="startBtn"><button><i class="fa-solid fa-play"></i></button></div>
+    <div class="sequencer">
+        <div class="trackLabels">
+            <p>Click</p>
+            <p>Snare</p>
+            <p>Hi-hat pulse</p>
+            <p>Bass Drum</p>
+        </div>
+        <div id="sequencerLanes"></div>
+    </div>
+    <div id="bpmSlider">
+        <h3 id="bpmValue">BPM 120</h3>
+    </div>
 </body>
 
 </html>

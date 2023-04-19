@@ -58,14 +58,39 @@ let numInstruments;
 let cnv;
 let playhead = [];
 let cursorPos;
+let context;
+let numInput;
+let numBtn;
 
-pattern = [1, 0, 5, 4, 5];
+
+let pattern = [1, 0, 5, 4, 5];
+    snarePat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    hhPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    bdPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    pulsePat = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,];
+
+function applyRhythm() {
+    numInput = document.querySelector('#numInput');
+    pattern = Array.from(numInput.value.split(''), Number);
+    snarePat = convertPattern(pattern, true);
+    drums.removePhrase(snarePhrase);
+    snarePhrase = new p5.Phrase('snare', (time) => {
+        snare.play(time);
+        // console.log(time);
+    }, snarePat);
+    beatLength = snarePat.length;
+    drums.addPhrase(snarePhrase);
+    redraw();
+    noLoop();
+}
+
 
 // p5 sketch setup
 function setup() {
     // mimics Google autoplay policy
     getAudioContext().suspend();
     cnv = createCanvas(320, 80);
+    cnv.parent('sequencerLanes');
     cnv.mousePressed(canvasPressed);
 
     hh = loadSound('assets/MPC60/CH 909 A MPC60 07.wav', () => { });  // return to this callback later
@@ -73,11 +98,7 @@ function setup() {
     bd = loadSound('assets/MPC60/BD Club Pressure MPC60 11.wav', () => { });  // return to this callback later
     pulse = loadSound('assets/DMX/CH Acc DMX 21.wav', () => { });
 
-    snarePat = convertPattern(pattern, true);
     beatLength = snarePat.length;
-    hhPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    bdPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    pulsePat = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,];
 
     // beatLength = 16;
     numInstruments = 4;
@@ -90,9 +111,9 @@ function setup() {
         // console.log(time);
     }, hhPat);
     snarePhrase = new p5.Phrase('snare', (time) => {
-        snare.play(time);
-        // console.log(time);
-    }, snarePat);
+            snare.play(time);
+            // console.log(time);
+        }, snarePat);
     bdPhrase = new p5.Phrase('bd', (time) => {
         bd.play(time);
         // console.log(time);
@@ -111,11 +132,18 @@ function setup() {
     drums.addPhrase('seq', sequence, playhead)
 
     bpmControl = createSlider(30, 300, 120, 1);
-    bpmControl.position(10, 100);
-    bpmControl.input(() => { drums.setBPM(bpmControl.value()) });
+
+    // bpmControl.position(10, 120);
+    bpmControl.parent('bpmSlider')
+    let bpmValue = document.querySelector('#bpmValue');
+    bpmControl.input(() => { 
+        drums.setBPM(bpmControl.value()) ;
+        bpmValue.innerText = "BPM " + bpmControl.value();
+    });
 
     drums.setBPM('120');
-    drawMatrix();
+    noLoop();
+    redraw();
 }
 
 // Toggle drum loop on pressing spacebar
@@ -124,8 +152,6 @@ function keyPressed() {
         startSequence();
     }
 }
-
-let context;
 
 // Toggle drum loop on clicking start button
 window.addEventListener('DOMContentLoaded', () => {
@@ -145,16 +171,15 @@ function startSequence() {
             drums.metro.metroTicks = 0;
             userStartAudio();                                                  // required to ensure Audio Context is enabled via user prompt
             drums.loop();
-            startBtn.textContent = 'Stop';
+            startBtn.firstChild.innerHTML = '<i class="fa-solid fa-stop"></i>';
         } else {
             drums.stop();
-            startBtn.textContent = 'Play';
+            startBtn.firstChild.innerHTML = '<i class="fa-solid fa-play"></i>';
         }
     } else {
         console.log('Samples have not loaded yet, please wait')
     }
 }
-
 
 function canvasPressed() {
     let rowClicked = floor(numInstruments * mouseY / height);
@@ -172,11 +197,11 @@ function canvasPressed() {
         console.log('fourth row ' + indexClicked);
         bdPat[indexClicked] = invert(bdPat[indexClicked]);
     }
-    drawMatrix();
+    redraw();
 }
 
 // Function for drawing sequencer grid. Refreshes each time you click a cell with the canvasPressed() function
-function drawMatrix() {
+function draw() {
     background(80);
     stroke('gray');
     strokeWeight(2);
@@ -224,7 +249,7 @@ function sequence(time, beatIndex) {
     console.log(beatIndex);
     // Synchronising playhead with beat by delaying playhead. By default this is out of sync because the callback runs ahead of the beat
     setTimeout(() => {
-        drawMatrix();
+        redraw();
         drawPlayhead(beatIndex);
     }, time * 1000);                                // 'time' method returns time in seconds, so converting to ms
 }
