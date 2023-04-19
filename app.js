@@ -63,6 +63,8 @@ pattern = [1, 0, 5, 4, 5];
 
 // p5 sketch setup
 function setup() {
+    // mimics Google autoplay policy
+    getAudioContext().suspend();
     cnv = createCanvas(320, 80);
     cnv.mousePressed(canvasPressed);
 
@@ -121,6 +123,7 @@ function keyPressed() {
     if (key === " ") {
         if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
             if (!drums.isPlaying) {
+                userStartAudio();
                 drums.metro.metroTicks = 0;
                 context.resume().then(() => {
                     drums.loop();
@@ -134,24 +137,24 @@ function keyPressed() {
     }
 }
 
-// Setup which fixes 'The AudioContext was not allowed to start' permissions issue. See keyPressed() function which resumes context
 let context;
-window.onload = function () {
-    context = new AudioContext();
-}
-
 // Toggle drum loop on clicking start button
-window.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.querySelector('#startBtn');
-    startBtn.addEventListener('click', function () {
+    startBtn.addEventListener('click', () => {
+        context = new AudioContext();
+        context.onstatechange = function () {
+            console.log(context.state);
+        }
         if (hh.isLoaded() && snare.isLoaded() && bd.isLoaded()) {
             if (!drums.isPlaying) {
                 drums.metro.metroTicks = 0;
-                context.resume().then(() => {
-                    drums.loop();
-                });
+                userStartAudio();                                                  // required to ensure Audio Context is enabled via user prompt
+                drums.loop();
+                startBtn.textContent = 'Stop';
             } else {
                 drums.stop();
+                startBtn.textContent = 'Play';
             }
         } else {
             console.log('Samples have not loaded yet, please wait')
