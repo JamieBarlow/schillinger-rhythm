@@ -63,47 +63,48 @@ let numInput;
 let numBtn;
 
 
+// Patterns: 1 = beat, 0 = rest
 let pattern = [1, 0, 5, 4, 5];
-    snarePat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    hhPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    bdPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    pulsePat = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,];
+snarePat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+hhPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+bdPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+pulsePat = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,];
 
+// Converts a pattern of humbers input by the user to 1s and 0s. Called on clicking button in browser
 function applyRhythm() {
+    // Get user input and convert to array
     numInput = document.querySelector('#numInput');
     pattern = Array.from(numInput.value.split(''), Number);
-    snarePat = convertPattern(pattern, true);
-    drums.removePhrase(snarePhrase);
+    // Reset current snare phrase and convert to new user phrase
+    console.log(drums);
+    drums.removePhrase('snare');
+    let currentPat = convertPattern(pattern, true);
+    snarePat = currentPat;
     snarePhrase = new p5.Phrase('snare', (time) => {
         snare.play(time);
-        // console.log(time);
     }, snarePat);
-    beatLength = snarePat.length;
     drums.addPhrase(snarePhrase);
     redraw();
     noLoop();
 }
 
-
-// p5 sketch setup
-function setup() {
-    // mimics Google autoplay policy
-    getAudioContext().suspend();
-    cnv = createCanvas(320, 80);
-    cnv.parent('sequencerLanes');
-    cnv.mousePressed(canvasPressed);
-
+// Preload runs before setup
+function preload() {
     hh = loadSound('assets/MPC60/CH 909 A MPC60 07.wav', () => { });  // return to this callback later
     snare = loadSound('assets/MPC60/Snare Wood Tail Short MPC60 13.wav', () => { });  // return to this callback later
     bd = loadSound('assets/MPC60/BD Club Pressure MPC60 11.wav', () => { });  // return to this callback later
     pulse = loadSound('assets/DMX/CH Acc DMX 21.wav', () => { });
+}
 
-    beatLength = snarePat.length;
-
-    // beatLength = 16;
-    numInstruments = 4;
-    cellWidth = width / beatLength;
-    cursorPos = 0;
+// p5 sketch setup - runs after preload
+function setup() {
+    // mimics Google autoplay policy
+    getAudioContext().suspend();
+    beatLength = snarePat.length;    // determines num of cols. Default 16
+    numInstruments = 4;     // determines num of rows
+    cnv = createCanvas(20 * beatLength, 20 * numInstruments);
+    cnv.parent('sequencerLanes');
+    cnv.mousePressed(canvasPressed);
 
     createPlayhead();
     hhPhrase = new p5.Phrase('hh', (time) => {
@@ -111,9 +112,9 @@ function setup() {
         // console.log(time);
     }, hhPat);
     snarePhrase = new p5.Phrase('snare', (time) => {
-            snare.play(time);
-            // console.log(time);
-        }, snarePat);
+        snare.play(time);
+        // console.log(time);
+    }, snarePat);
     bdPhrase = new p5.Phrase('bd', (time) => {
         bd.play(time);
         // console.log(time);
@@ -122,28 +123,64 @@ function setup() {
         pulse.play(time);
         // console.log(time);
     }, pulsePat);
+    
 
     drums = new p5.Part();
-
     drums.addPhrase(hhPhrase);
     drums.addPhrase(snarePhrase);
     drums.addPhrase(pulsePhrase);
     drums.addPhrase(bdPhrase);
     drums.addPhrase('seq', sequence, playhead)
+    drums.setBPM('120');
 
     bpmControl = createSlider(30, 300, 120, 1);
 
     // bpmControl.position(10, 120);
     bpmControl.parent('bpmSlider')
     let bpmValue = document.querySelector('#bpmValue');
-    bpmControl.input(() => { 
-        drums.setBPM(bpmControl.value()) ;
+    bpmControl.input(() => {
+        drums.setBPM(bpmControl.value());
         bpmValue.innerText = "BPM " + bpmControl.value();
     });
 
-    drums.setBPM('120');
-    noLoop();
-    redraw();
+    
+    noLoop();    // draw() runs once only after this on setup, unless triggered with redraw()
+    // redraw();
+}
+
+// Function for drawing sequencer grid. Refreshes each time you click a cell with the canvasPressed() function
+function draw() {
+    background(80);
+    stroke('gray');
+    strokeWeight(2);
+    fill('white');
+    cellWidth = width / beatLength;
+    cursorPos = 0;
+    // Draw column grid lines
+    for (let i = 0; i < beatLength + 1; i++) {
+        // startx, starty, endx, endy
+        line(i * cellWidth, 0, i * cellWidth, height);
+    }
+    // Draw row grid lines
+    for (let i = 0; i < 4; i++) {
+        line(0, i * height / numInstruments, width, i * height / numInstruments);
+    }
+    noStroke();
+    // Drawing circles in column for pattern (updated with canvasPressed() function when user clicks)
+    for (let i = 0; i < beatLength; i++) {
+        if (hhPat[i] === 1) {
+            ellipse(i * cellWidth + 0.5 * cellWidth, 0.5 * cellWidth, 10);
+        }
+        if (snarePat[i] === 1) {
+            ellipse(i * cellWidth + 0.5 * cellWidth, 1.5 * cellWidth, 10);
+        }
+        if (pulsePat[i] === 1) {
+            ellipse(i * cellWidth + 0.5 * cellWidth, 2.5 * cellWidth, 10);
+        }
+        if (bdPat[i] === 1) {
+            ellipse(i * cellWidth + 0.5 * cellWidth, 3.5 * cellWidth, 10);
+        }
+    }
 }
 
 // Toggle drum loop on pressing spacebar
@@ -161,6 +198,7 @@ window.addEventListener('DOMContentLoaded', () => {
     })
 });
 
+// Play audio on user prompt
 function startSequence() {
     context = new AudioContext();
     context.onstatechange = function () {
@@ -198,39 +236,6 @@ function canvasPressed() {
         bdPat[indexClicked] = invert(bdPat[indexClicked]);
     }
     redraw();
-}
-
-// Function for drawing sequencer grid. Refreshes each time you click a cell with the canvasPressed() function
-function draw() {
-    background(80);
-    stroke('gray');
-    strokeWeight(2);
-    fill('white');
-    // Draw column grid lines
-    for (let i = 0; i < beatLength + 1; i++) {
-        // startx, starty, endx, endy
-        line(i * cellWidth, 0, i * cellWidth, height);
-    }
-    // Draw row grid lines
-    for (let i = 0; i < 4; i++) {
-        line(0, i * height / numInstruments, width, i * height / numInstruments);
-    }
-    noStroke();
-    // Drawing circles in column for pattern (updated with canvasPressed() function when user clicks)
-    for (let i = 0; i < beatLength; i++) {
-        if (hhPat[i] === 1) {
-            ellipse(i * cellWidth + 0.5 * cellWidth, 0.5 * cellWidth, 10);
-        }
-        if (snarePat[i] === 1) {
-            ellipse(i * cellWidth + 0.5 * cellWidth, 1.5 * cellWidth, 10);
-        }
-        if (pulsePat[i] === 1) {
-            ellipse(i * cellWidth + 0.5 * cellWidth, 2.5 * cellWidth, 10);
-        }
-        if (bdPat[i] === 1) {
-            ellipse(i * cellWidth + 0.5 * cellWidth, 3.5 * cellWidth, 10);
-        }
-    }
 }
 
 // Reverses / toggles the state of a sample - either '1' (active) or '0' (inactive)
@@ -273,7 +278,7 @@ function convertPattern(ptn, chooseRegular) {
     if (chooseRegular === true && isIrregular(ptn) === true) {
         outputPtn.push(0);
     }
-    console.log(outputPtn);
+    console.log("Converted pattern:" + outputPtn);
     return outputPtn;
 }
 
