@@ -64,7 +64,7 @@ let numBtn;
 
 
 // Patterns: 1 = beat, 0 = rest
-let pattern = [1, 0, 5, 4, 5];
+let userPattern = [1, 0, 5, 4, 5];
 snarePat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 hhPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 bdPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -76,11 +76,19 @@ function applyRhythm() {
     const selectMetre = document.querySelector('#metre').value;
     // Get user input and convert to array
     numInput = document.querySelector('#numInput');
-    pattern = Array.from(numInput.value.split(''), Number);
+    userPattern = Array.from(numInput.value.split(''), Number);
+    // Define beat length either by user pattern (default) or fixed user value
+    const ptnLength = userPattern.reduce((a, b) => a + b);
+    const beats = document.querySelector('#beats').value;
+    if (!beats) {
+        beatLength = ptnLength;
+    } else {
+        beatLength = beats;
+    }
     // Reset current snare phrase and convert to new user phrase
     console.log(drums);
     drums.removePhrase('snare');
-    let currentPat = convertPattern(pattern, selectMetre);
+    let currentPat = convertPattern(userPattern, ptnLength, selectMetre);
     snarePat = currentPat;
     snarePhrase = new p5.Phrase('snare', (time) => {
         snare.play(time);
@@ -269,9 +277,8 @@ function drawPlayhead(beatIndex) {
 
 /* This function allows you to input an array of numbers to convert to a beat pattern. If you enter the boolean value true for the second argument, 
 the pattern will add an extra beat to create a regular meter */
-function convertPattern(ptn, selectMetre) {
+function convertPattern(ptn, ptnLength, selectMetre) {
     let outputPtn = [];
-    const ptnLength = ptn.reduce((a, b) => a + b);
     console.log("Pattern length: " + ptnLength)
     for (let i = 0; i < ptn.length; i++) {
         if (ptn[i] !== 0) {
@@ -281,7 +288,7 @@ function convertPattern(ptn, selectMetre) {
         }
     }
     // fills out the remainder of the overall beat if regular metre is selected, so that the cycle restarts on beat loop
-    if (selectMetre === 'regular' && isIrregular(ptnLength) === true) {
+    if (selectMetre === 'regular') {
         const rests = beatLength - ptnLength;
         for (let i = 0; i < rests; i++) {
             outputPtn.push(0);
