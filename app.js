@@ -94,6 +94,12 @@ function applyRhythm() {
         snare.play(time);
     }, snarePat);
     drums.addPhrase(snarePhrase);
+
+    // Reset Playhead to account for change of pattern length
+    drums.removePhrase('seq');
+    createPlayhead();
+    drums.addPhrase('seq', sequence, playhead);
+
     redraw();
     noLoop();
 }
@@ -141,11 +147,11 @@ function setup() {
     drums.addPhrase(pulsePhrase);
     drums.addPhrase(bdPhrase);
     drums.addPhrase('seq', sequence, playhead)
-    drums.setBPM('120');
 
-    bpmControl = createSlider(30, 300, 120, 1);
-
+    //BPM slider
     // bpmControl.position(10, 120);
+    drums.setBPM('120');
+    bpmControl = createSlider(30, 300, 120, 1);
     bpmControl.parent('bpmSlider')
     let bpmValue = document.querySelector('#bpmValue');
     bpmControl.input(() => {
@@ -160,11 +166,14 @@ function setup() {
 
 // Function for drawing sequencer grid. Refreshes each time you click a cell with the canvasPressed() function
 function draw() {
+    resizeCanvas(20 * beatLength, 20 * numInstruments);
+    cellWidth = width / beatLength;
+    // createPlayhead();
     background(80);
     stroke('gray');
     strokeWeight(2);
     fill('white');
-    cellWidth = width / beatLength;
+    
     cursorPos = 0;
     // Draw column grid lines
     for (let i = 0; i < beatLength + 1; i++) {
@@ -255,6 +264,7 @@ function invert(bitInput) {
 
 // Create an array of incrementing numbers representing the steps of the playhead
 function createPlayhead() {
+    playhead = [];
     for (let i = 0; i < beatLength; i++) {
         playhead.push(i + 1);
     }
