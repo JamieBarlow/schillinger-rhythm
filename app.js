@@ -86,7 +86,6 @@ function applyRhythm() {
         beatLength = beats;
     }
     // Reset current snare phrase and convert to new user phrase
-    console.log(drums);
     drums.removePhrase('snare');
     let currentPat = convertPattern(userPattern, ptnLength, selectMetre);
     snarePat = currentPat;
@@ -95,6 +94,15 @@ function applyRhythm() {
     }, snarePat);
     drums.addPhrase(snarePhrase);
 
+    drums.removePhrase('pulse');
+    pulsePat = createPulse();
+    pulsePhrase = new p5.Phrase('pulse', (time) => {
+        pulse.play(time);
+    }, pulsePat);
+    drums.addPhrase(pulsePhrase);
+
+    console.log(drums)
+
     // Reset Playhead to account for change of pattern length
     drums.removePhrase('seq');
     createPlayhead();
@@ -102,6 +110,23 @@ function applyRhythm() {
 
     redraw();
     noLoop();
+}
+
+function createPulse() {
+    pulsePat = [];
+    console.log(beatLength);
+    if (isIrregular(beatLength) === true) {
+        const halfBeatLength = Math.floor(beatLength / 2);
+        for (let i = 0; i < halfBeatLength; i++) {
+            pulsePat.push(1, 0);
+        }
+        pulsePat.push(1);
+    } else {
+        for (let i = 0; i < beatLength / 2; i++) {
+            pulsePat.push(1, 0);
+        }
+    }
+    return pulsePat;
 }
 
 // Preload runs before setup
