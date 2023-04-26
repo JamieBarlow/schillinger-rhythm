@@ -296,12 +296,15 @@ function createPlayhead() {
 }
 
 function sequence(time, beatIndex) {
-    console.log(beatIndex);
+    console.log("beatIndex " + beatIndex);
     // Synchronising playhead with beat by delaying playhead. By default this is out of sync because the callback runs ahead of the beat
     setTimeout(() => {
         redraw();
         drawPlayhead(beatIndex);
-    }, time * 1000);                                // 'time' method returns time in seconds, so converting to ms
+    }, time * 1000);   
+    if (beatIndex === 16) {
+        redraw();
+    }                          // 'time' method returns time in seconds, so converting to ms
 }
 
 function drawPlayhead(beatIndex) {
@@ -323,11 +326,9 @@ function convertPattern(ptn, ptnLength, selectMetre) {
         }
     }
     // fills out the remainder of the overall beat if regular metre is selected, so that the cycle restarts on beat loop
-    if (selectMetre === 'regular') {
-        const rests = beatLength - ptnLength;
-        for (let i = 0; i < rests; i++) {
-            outputPtn.push(0);
-        } 
+    if (selectMetre === 'regular' && (isIrregular(ptnLength)) === true) {
+        beatLength++;
+        outputPtn.push(0);
     }
     return outputPtn;
 }
