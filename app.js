@@ -72,13 +72,15 @@ pulsePat = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,];
 
 // Converts a pattern of humbers input by the user to 1s and 0s. Called on clicking button in browser
 function applyRhythm() {
+    // Select regular or irregular metre
+    const selectMetre = document.querySelector('#metre').value;
     // Get user input and convert to array
     numInput = document.querySelector('#numInput');
     pattern = Array.from(numInput.value.split(''), Number);
     // Reset current snare phrase and convert to new user phrase
     console.log(drums);
     drums.removePhrase('snare');
-    let currentPat = convertPattern(pattern, true);
+    let currentPat = convertPattern(pattern, selectMetre);
     snarePat = currentPat;
     snarePhrase = new p5.Phrase('snare', (time) => {
         snare.play(time);
@@ -267,23 +269,28 @@ function drawPlayhead(beatIndex) {
 
 /* This function allows you to input an array of numbers to convert to a beat pattern. If you enter the boolean value true for the second argument, 
 the pattern will add an extra beat to create a regular meter */
-function convertPattern(ptn, chooseRegular) {
+function convertPattern(ptn, selectMetre) {
     let outputPtn = [];
+    const ptnLength = ptn.reduce((a, b) => a + b);
+    console.log("Pattern length: " + ptnLength)
     for (let i = 0; i < ptn.length; i++) {
         if (ptn[i] !== 0) {
+            // Creates a note for each number in the pattern - this consists of a 1, followed by the correct number of 0s (rests)
             const noteLength = new Array(ptn[i] - 1).fill(0);
             outputPtn.push(1, ...noteLength);
         }
     }
-    if (chooseRegular === true && isIrregular(ptn) === true) {
-        outputPtn.push(0);
+    // fills out the remainder of the overall beat if regular metre is selected, so that the cycle restarts on beat loop
+    if (selectMetre === 'regular' && isIrregular(ptnLength) === true) {
+        const rests = beatLength - ptnLength;
+        for (let i = 0; i < rests; i++) {
+            outputPtn.push(0);
+        } 
     }
-    console.log("Converted pattern:" + outputPtn);
     return outputPtn;
 }
 
 // If the pattern doesn't contain an even number of beats, this function returns true
-function isIrregular(ptn) {
-    const ptnLength = ptn.reduce((a, b) => a + b);
+function isIrregular(ptnLength) {
     return (ptnLength % 2 !== 0) ? true : false;
 }
