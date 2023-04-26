@@ -6,6 +6,11 @@ p {
     margin: 2.5px;
 }
 
+input, select {
+    display: block;
+    margin: 10px 0;
+}
+
 button {
     
 }

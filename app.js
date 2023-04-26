@@ -85,6 +85,7 @@ function applyRhythm() {
     } else {
         beatLength = beats;
     }
+
     // Reset current snare phrase and convert to new user phrase
     drums.removePhrase('snare');
     let currentPat = convertPattern(userPattern, ptnLength, selectMetre);
@@ -101,7 +102,20 @@ function applyRhythm() {
     }, pulsePat);
     drums.addPhrase(pulsePhrase);
 
-    console.log(drums)
+    // Reset other phrases
+    drums.removePhrase('bd');
+    bdPat = new Array(beatLength).fill(0);
+    bdPhrase = new p5.Phrase('bd', (time) => {
+        bd.play(time);
+    }, bdPat);
+    drums.addPhrase(bdPhrase);
+
+    drums.removePhrase('hh');
+    hhPat = new Array(beatLength).fill(0);
+    hhPhrase = new p5.Phrase('hh', (time) => {
+        hh.play(time);
+    }, hhPat);
+    drums.addPhrase(hhPhrase);
 
     // Reset Playhead to account for change of pattern length
     drums.removePhrase('seq');
@@ -330,6 +344,7 @@ function convertPattern(ptn, ptnLength, selectMetre) {
         beatLength++;
         outputPtn.push(0);
     }
+    console.log(outputPtn);
     return outputPtn;
 }
 
