@@ -45,7 +45,25 @@
 
 ## Development Challenges :wrench:
 
-- 
+- The [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) is used for audio playback in the browser, but comes with some policy restrictions - understandably, auto-playback is restricted and the API therefore expects some form of explicit user interaction in order to allow permission to play audio. However, setting this up was more complex than anticipated - I was frequently faced with 'the Audio Context was not allowed to start' error messages, even if playback was linked to a play button or keyboard input. Creating an `AudioContext()` object on page load before receiving a user gesture did not consistentlu have the [expected functionality](https://developer.chrome.com/blog/autoplay/#web-audio) - i.e. starting in a 'suspended' state, which could then be 'resumed' by the user. 
+
+  I was able to resolve this with the right combination of settings - first, ensuring that the AudioContext was suspended   on setting up the page, which mimics Google's autoplay policy but more explicitly:
+
+  ```javaScript
+  function setup() {
+    getAudioContext().suspend();
+    ...
+  }
+  ```
+  I also needed to create the AudioContext on the user's prompt, not on page load:
+  
+  ```javaScript
+    // Play audio on user prompt
+    function startSequence() {
+      context = new AudioContext();
+    ...
+    }
+  ```
 
 ## Upcoming features :hourglass:
 
