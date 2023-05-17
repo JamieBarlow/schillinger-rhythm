@@ -62,7 +62,7 @@
       }, time * 1000);
     }
     ```
-    
+
 - The [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) is used for audio playback in the browser, but comes with some policy restrictions - understandably, auto-playback is restricted and the API therefore expects some form of explicit user interaction in order to allow permission to play audio. However, setting this up was more complex than anticipated - I was frequently faced with 'the Audio Context was not allowed to start' error messages, even if playback was linked to a play button or keyboard input. Creating an `AudioContext` object on page load before receiving a user gesture did not consistently have the [expected functionality](https://developer.chrome.com/blog/autoplay/#web-audio) - i.e. starting in a 'suspended' state, which could then be 'resumed' by the user. 
 
   I was able to resolve this with the right combination of settings - first, ensuring that the existing AudioContext was  suspended on setting up the page, which mimics Google's autoplay policy but more explicitly:
@@ -89,6 +89,19 @@
     }
   ```
   This appears to have fully resolved the error across browsers and user scenarios, while conforming to the autoplay  policy.
+  
+- The p5.sound method, [stop()](https://p5js.org/reference/#/p5.Part/stop), actually acts like a 'pause' function in practice, and does not cue the part to step 0. As I wanted the app to restart the pattern on each click of 'play', I needed to use the following manual workaround with the `Part.metro.metroTicks` property:
+
+  ```javascript
+  function startSequence() {
+    if (!drums.isPlaying) {
+      drums.metro.metroTicks = 0;
+      userStartAudio();
+      drums.loop();
+    }
+  }
+  ```
+  This required some experimentation with the [p5.Part](https://p5js.org/reference/#/p5.Part) object.
  
 - User interface: updating the playback pattern when the user clicks a cell in the seqencer - I needed to implement both: 1) updating the visual sequencer grid, and 2) updating the sound sequence for playback. This was achieved by linking each 'block' within a sequencer row to an index number, determined by the mouseclick position within the grid (determined dynamically as the grid changes in size, linked to the number of instruments and the beat length):
  
