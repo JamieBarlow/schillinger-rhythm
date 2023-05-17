@@ -45,9 +45,9 @@
 
 ## Development Challenges :wrench:
 
-- The [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) is used for audio playback in the browser, but comes with some policy restrictions - understandably, auto-playback is restricted and the API therefore expects some form of explicit user interaction in order to allow permission to play audio. However, setting this up was more complex than anticipated - I was frequently faced with 'the Audio Context was not allowed to start' error messages, even if playback was linked to a play button or keyboard input. Creating an `AudioContext()` object on page load before receiving a user gesture did not consistentlu have the [expected functionality](https://developer.chrome.com/blog/autoplay/#web-audio) - i.e. starting in a 'suspended' state, which could then be 'resumed' by the user. 
+- The [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) is used for audio playback in the browser, but comes with some policy restrictions - understandably, auto-playback is restricted and the API therefore expects some form of explicit user interaction in order to allow permission to play audio. However, setting this up was more complex than anticipated - I was frequently faced with 'the Audio Context was not allowed to start' error messages, even if playback was linked to a play button or keyboard input. Creating an `AudioContext` object on page load before receiving a user gesture did not consistently have the [expected functionality](https://developer.chrome.com/blog/autoplay/#web-audio) - i.e. starting in a 'suspended' state, which could then be 'resumed' by the user. 
 
-  I was able to resolve this with the right combination of settings - first, ensuring that the AudioContext was suspended   on setting up the page, which mimics Google's autoplay policy but more explicitly:
+  I was able to resolve this with the right combination of settings - first, ensuring that the existing AudioContext was suspended on setting up the page, which mimics Google's autoplay policy but more explicitly:
 
   ```javaScript
   function setup() {
@@ -55,15 +55,55 @@
     ...
   }
   ```
-  I also needed to create the AudioContext on the user's prompt, not on page load:
+  I also needed to create the AudioContext on the user's prompt, not on page load, and then resume the context, which I achieved using the [p5.sound](https://p5js.org/reference/#/p5/userStartAudio) `userStartAudio()` function:
   
   ```javaScript
     // Play audio on user prompt
     function startSequence() {
       context = new AudioContext();
-    ...
+      ...
+    if (!drums.isPlaying) {
+      userStartAudio();
+      drums.loop();
+      } else {
+        drums.stop();
+      }
     }
   ```
+ This appears to have fully resolved the error across browsers and user scenarios, while conforming to the autoplay policy.
+ 
+ - Updating the playback pattern when the user clicks a cell in the seqencer - I needed to implement both: 1) updating the visual sequencer grid, and 2) updating the sound sequence for playback. This was achieved by linking each 'block' within a sequencer row to an index number, determined by the mouseclick position within the grid (determined dynamically as the grid changes in size, linked to the number of instruments and the beat length):
+ 
+  ```javaScript
+    let rowClicked = floor(numInstruments * mouseY / height);
+    let indexClicked = floor(beatLength * mouseX / width);
+  ```
+  
+  Since each beat is defined as either '1' (beat) and '0' (rest), I was then able to tackle both visual and audio elements by adjusting the pattern with a simple invert function triggered by mouseclick:
+  
+  ```javaScript
+    function invert(bitInput) {
+      return bitInput === 1 ? 0 : 1;
+    }
+  ```
+  
+This inversion was then fed into updating visual and audio respectively by: 1) updating the visual grid using the p5 function  `redraw()` using the [canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API), and 2) updating the pattern itself:
+
+  ```javascript
+  function canvasPressed() {
+      if (rowClicked === 0) {
+        hhPat[indexClicked] = invert(hhPat[indexClicked]);
+      } else if (rowClicked === 1) {
+        snarePat[indexClicked] = invert(snarePat[indexClicked]);
+      }
+      // etc.
+      redraw();
+    }
+  ```
+ 
+ - Working with user-defined pattern/bar lengths and the sequencer display: this introduces quite a complex variable to the sequencer, which requires it to update dynamically as the sequence plays. If the sequence length is defined by the user input (default behaviour), this is fairly straightforward - for example, the input '12461' will result in a cycle of 14 beats (1+2+4+6+1 = 14) and the same sequence will simply cycle through with no need to adapt on each repetition. By contrast, if I apply the same input but set the sequence length to longer, e.g. 16 beats, the sequencer will not only need to fit the next cycle of the pattern into the remaining 2 beats in the bar, but will also need to 'shift' the pattern on the next cycle.
+
+One option here is to add rests to the end of the pattern, to account for . This may be desired by the user, but doesn't take full advantage of the 'interference patterns' which makes Schillinger rhythm theory interesting in practice.
 
 ## Upcoming features :hourglass:
 
