@@ -132,9 +132,11 @@
     }
     ```
  
- - Working with user-defined pattern/bar lengths and the sequencer display: this introduces quite a complex variable to the sequencer, which requires it to update dynamically as the sequence plays. If the sequence length is defined by the user input (default behaviour), this is fairly straightforward - for example, the input '12461' will result in a cycle of 14 beats (1+2+4+6+1 = 14) and the same sequence will simply cycle through with no need to adapt on each repetition. By contrast, if I apply the same input but set the sequence length to longer, e.g. 16 beats, the sequencer will not only need to fit the next cycle of the pattern into the remaining 2 beats in the bar, but will also need to 'shift' the pattern on the next cycle.
-
-  One simple option here is to add rests to the end of the pattern, to make up for the remaining space. This may be desired by the user, allowing the pattern to remain consistent on each cycle, but doesn't take full advantage of the 'interference patterns' which makes Schillinger rhythm theory interesting in practice. The pattern would need the ability to dynamically shift on each cycle, and the app would need to redraw the visual pattern once the playhead reached the end of the sequence.
+ - Working with user-defined pattern/bar lengths and the sequencer display: this introduces quite a complex variable to the sequencer, which requires it to update dynamically as the sequence plays. 
+   - If the sequence length is defined by the user input (default behaviour), this is fairly straightforward - for example, the input '12461' will result in a cycle of 14 beats (1+2+4+6+1 = 14) and the same sequence will simply cycle through with no need to adapt on each repetition. 
+   - If the user sets a sequence length that is shorter than the total length of the number pattern, the app will simply truncate that pattern - again not too complex.
+   - By contrast, if I apply the same input but set the sequence length to longer, e.g. 16 beats, the sequencer will not only need to fit the beginning of the next cycle of the pattern into the remaining 2 beats in the bar, but will also need to 'shift' the pattern on the next cycle, as it has already started its 2nd cycle.
+   - One simple option here is to add rests to the end of the pattern, to make up for the remaining space. This may be desired by the user, allowing the pattern to remain consistent on each cycle, but doesn't take full advantage of the 'interference patterns' which makes Schillinger rhythm theory interesting in practice. The pattern would need the ability to dynamically shift on each cycle, and the app would need to redraw the visual pattern once the playhead reached the end of the sequence.
 
 ## Upcoming features :hourglass:
 
