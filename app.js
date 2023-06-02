@@ -51,7 +51,6 @@
 // instrument parts
 let bd, snare, hh, pulse;           // instrument. This serves as a container that will hold a sound source.
 let bdPat, snarePat, hhPat, pulsePat;  // pattern. Will be an array of numbers (1 = on-note, 0 = rest)
-let shiftingSnarePat;
 let bdPhrase, snarePhrase, hhPhrase, pulsePhrase;  // defines how the pattern is interpreted
 let drums;  // full drum part. We will attach the phrase to the part, which will serve as our transport to drive the phrase.
 let bpmControl;
@@ -66,6 +65,8 @@ let cursorPos;
 let context;
 let numInput;
 let numBtn;
+let cycleCounter = 1;
+let recycledUserPtns = [];
 
 
 // Patterns: 1 = beat, 0 = rest
@@ -137,6 +138,10 @@ function setup() {
 
 // Function for drawing sequencer grid. Refreshes each time you click a cell with the canvasPressed() function
 function draw() {
+    let userPtn = snarePat;
+    if (userSequenceLength > userPatternLength) {
+        userPtn = extendPtn(snarePat);
+    }
     resizeCanvas(20 * sequenceLength, 20 * numInstruments);
     cellWidth = width / sequenceLength;
     // createPlayhead();
@@ -161,7 +166,7 @@ function draw() {
         if (hhPat[i] === 1) {
             ellipse(i * cellWidth + 0.5 * cellWidth, 0.5 * cellWidth, 10);
         }
-        if (snarePat[i] === 1) {
+        if (userPtn[i] === 1) {
             ellipse(i * cellWidth + 0.5 * cellWidth, 1.5 * cellWidth, 10);
         }
         if (pulsePat[i] === 1) {
@@ -268,6 +273,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Play audio on user prompt
 function startSequence() {
+    if (userSequenceLength > userPatternLength) {
+        recycledUserPtns = [[]];
+        let cycle1 = extendPtn();
+        recyclePtn(cycle1);
+    }
+    cycleCounter = 1;
     context = new AudioContext();
     context.onstatechange = function () {
         console.log(context.state);
@@ -320,16 +331,15 @@ function createPlayhead() {
 }
 
 
-// Sets up loop cycle and pattern length - runs on each cycle. This is passed in to drums.addPhrase('seq', sequence, playhead)
-let cycleCounter = 1;
+// Runs on each step of the sequence. This is passed in to drums.addPhrase('seq', sequence, playhead)
 function sequence(time, beatIndex) {
     console.log(userPatternLength);
     if (cycleCounter === userPatternLength) cycleCounter = 0;
     console.log("beatIndex " + beatIndex);
     if (beatIndex == userSequenceLength) {
         console.log('end of sequence')
-        cycleCounter ++;
-        // snarePat = [1, 1, 1, 1, 1];
+        cycleCounter++;
+        snarePat = recycledUserPtns[cycleCounter];
         console.log(`cycle counter: ${cycleCounter}`)
     }
     // Synchronising playhead with beat by delaying playhead. By default this is out of sync because the callback runs ahead of the beat
@@ -357,46 +367,6 @@ function convertNumsToPattern(nums, sequenceLength, selectMetre) {
         }
     }
     let originalPtn = [...cycle1];
-    // Re-cycles through the pattern if the user sequence length is longer than the length of the user pattern
-    if (userSequenceLength > userPatternLength) {
-        console.log('user sequence length is longer than the pattern')
-        let remainder = userSequenceLength - userPatternLength;
-        let toFill = remainder;
-        
-        // fill out remainder of sequence
-        for (let i = 0; i < remainder; i++) {
-            if (remainder > originalPtn.length) {
-                console.log('need to repeat this until the sequence is filled!')
-            }
-            cycle1.push(originalPtn[i]);
-        }
-
-        console.log(`original pattern: ${originalPtn}`);
-        console.log(`pattern extended to fit sequence length: ${cycle1}`);
-
-        // Modify array so that it can be redrawn on each cycle
-        function cycles(arr) {
-            for (let i = 0; i < (originalPtn.length - 1); i++) {
-                let cycle = arr.slice(remainder);
-                for (let j = 0; j < remainder; j++) {
-                    cycle.push(arr[toFill]);
-                    toFill++;
-                }
-                toFill = remainder;
-                return cycle;
-            }
-        }
-        
-        // Starting with cycle 1, run the cycles() function repeatedly on the output of each cycle and log the result.
-        let cycle = cycle1;
-        for (let i = 2; i <= originalPtn.length; i++) {
-            cycle = cycles(cycle);
-            console.log(`cycle number ${i}:`, cycle);
-          }
-
-        console.log(`remainder: ${remainder}`)
-        console.log(`converted output pattern: ${originalPtn}`)
-    }
     // fills out the remainder of the overall beat if regular metre is selected, so that the cycle restarts on beat loop
     if (selectMetre === 'regular' && (isIrregular(sequenceLength)) === true) {
         sequenceLength++;
@@ -421,3 +391,55 @@ function getNotes(pattern) {
 function isIrregular(sequenceLength) {
     return (sequenceLength % 2 !== 0) ? true : false;
 }
+
+// extends the pattern if shorter than the 
+function extendPtn() {
+    let originalPtn = snarePat.slice();
+    let cycle1 = originalPtn.slice();
+    console.log('user sequence length is longer than the pattern')
+    let remainder = userSequenceLength - userPatternLength;
+    let toFill = remainder;
+    // fill out remainder of sequence
+    for (let i = 0; i < remainder; i++) {
+        if (remainder > originalPtn.length) {
+            console.log('need to repeat this until the sequence is filled!')
+        }
+        cycle1.push(originalPtn[i]);
+    }
+    console.log(`original pattern: ${originalPtn}`);
+    console.log(`pattern extended to fit sequence length: ${cycle1}`);
+    return cycle1;
+}
+
+// Re-cycles through the pattern if the user sequence length is longer than the length of the user pattern
+function recyclePtn(cycle1) {
+    let originalPtn = snarePat.slice();
+    let remainder = userSequenceLength - userPatternLength;
+    let toFill = remainder;
+    // Modify array so that it can be redrawn on each cycle
+    function cycles(arr) {
+        for (let i = 0; i < (originalPtn.length - 1); i++) {
+            let cycle = arr.slice(remainder);
+            for (let j = 0; j < remainder; j++) {
+                cycle.push(arr[toFill]);
+                toFill++;
+            }
+            toFill = remainder;
+            return cycle;
+        }
+    }
+    // Starting with cycle 1, run the cycles() function repeatedly on the output of each cycle and log the result.
+    recycledUserPtns.push(cycle1);
+    let cycle = cycle1;
+    for (let i = 2; i <= originalPtn.length; i++) {
+        cycle = cycles(cycle);
+        console.log(`cycle number ${i}:`, cycle);
+        recycledUserPtns.push(cycle);
+    }
+    console.log(`remainder: ${remainder}`)
+    console.log(`converted output pattern: ${originalPtn}`)
+    console.log(recycledUserPtns);
+}
+
+
+
