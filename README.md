@@ -45,7 +45,98 @@
 
 ## Development Challenges :wrench:
 
-- 
+- Inconsistent playback speed - for a rhythm-based app this could be quite an issue! By default, the grid-based patterns do not play back 'on beat' but rather slow down or speed up erratically, like a drunken drummer. I therefore needed to pass in a scheduled delay time as a [callback](https://p5js.org/reference/#/p5.Phrase) to the p5.sound [play() method](https://p5js.org/reference/#/p5.SoundFile/play), in order to produce a clock time that would be consistent with the sample rate:
+
+    ```javaScript
+    snarePhrase = new p5.Phrase('snare', (time) => {
+        snare.play(time);
+    }, snarePat);
+    ```
+  The playhead also needs to be synchronised to the audio, so I needed to use `setTimeout()` to add some artifical latency (1000ms) to the code before firing the 'redraw' function, in order to ensure this matches playback:
+ 
+    ```javascript
+    function sequence(time, beatIndex) {
+      setTimeout(() => {
+        redraw();
+        drawPlayhead(beatIndex);
+      }, time * 1000);
+    }
+    ```
+
+- The [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) is used for audio playback in the browser, but comes with some policy restrictions - understandably, auto-playback is restricted and the API therefore expects some form of explicit user interaction in order to allow permission to play audio. However, setting this up was more complex than anticipated - I was frequently faced with 'the Audio Context was not allowed to start' error messages, even if playback was linked to a play button or keyboard input. Creating an `AudioContext` object on page load before receiving a user gesture did not consistently have the [expected functionality](https://developer.chrome.com/blog/autoplay/#web-audio) - i.e. starting in a 'suspended' state, which could then be 'resumed' by the user. 
+
+  I was able to resolve this with the right combination of settings - first, ensuring that the existing AudioContext was  suspended on setting up the page, which mimics Google's autoplay policy but more explicitly:
+
+  ```javaScript
+  function setup() {
+    getAudioContext().suspend();
+    ...
+  }
+  ```
+  I also needed to create the AudioContext on the user's prompt, not on page load, and then resume the context, which I   achieved using the [p5.sound](https://p5js.org/reference/#/p5/userStartAudio) `userStartAudio()` function:
+  
+  ```javaScript
+    // Play audio on user prompt
+    function startSequence() {
+      context = new AudioContext();
+      ...
+    if (!drums.isPlaying) {
+      userStartAudio();
+      drums.loop();
+      } else {
+        drums.stop();
+      }
+    }
+  ```
+  This appears to have fully resolved the error across browsers and user scenarios, while conforming to the autoplay  policy.
+  
+- The p5.sound method, [stop()](https://p5js.org/reference/#/p5.Part/stop), actually acts like a 'pause' function in practice, and does not cue the part to step 0. As I wanted the app to restart the pattern on each click of 'play', I needed to use the following manual workaround with the `Part.metro.metroTicks` property:
+
+  ```javascript
+  function startSequence() {
+    if (!drums.isPlaying) {
+      drums.metro.metroTicks = 0;
+      userStartAudio();
+      drums.loop();
+    }
+  }
+  ```
+  This required some experimentation with the [p5.Part](https://p5js.org/reference/#/p5.Part) object.
+ 
+- User interface: updating the playback pattern when the user clicks a cell in the seqencer - I needed to implement both: 1) updating the visual sequencer grid, and 2) updating the sound sequence for playback. This was achieved by linking each 'block' within a sequencer row to an index number, determined by the mouseclick position within the grid (determined dynamically as the grid changes in size, linked to the number of instruments and the beat length):
+ 
+    ```javaScript
+    let rowClicked = floor(numInstruments * mouseY / height);
+    let indexClicked = floor(beatLength * mouseX / width);
+    ```
+  
+    Since each step of the sequence is defined as either '1' (beat) or '0' (rest), I was then able to tackle both visual and audio elements by adjusting the pattern with a simple invert function triggered by mouseclick:
+  
+    ```javaScript
+    function invert(bitInput) {
+      return bitInput === 1 ? 0 : 1;
+    }
+    ```
+  
+    This inversion was then fed into updating visual and audio respectively by: 1) updating the visual grid using the p5  function  `redraw()` using the [canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API), and 2) updating the pattern itself:
+
+    ```javascript
+    function canvasPressed() {
+      if (rowClicked === 0) {
+        hhPat[indexClicked] = invert(hhPat[indexClicked]);
+      } else if (rowClicked === 1) {
+        snarePat[indexClicked] = invert(snarePat[indexClicked]);
+      }
+      // etc.
+      redraw();
+    }
+    ```
+ 
+ - Working with user-defined pattern/bar lengths and the sequencer display: this introduces quite a complex variable to the sequencer, which requires it to update dynamically as the sequence plays. 
+   - If the sequence length is defined by the user input (default behaviour), this is fairly straightforward - for example, the input '12461' will result in a cycle of 14 beats (1+2+4+6+1 = 14) and the same sequence will simply cycle through with no need to adapt on each repetition. 
+   - By contrast, if I apply the same input but set the sequence length to longer, e.g. 16 beats, the sequencer will not only need to fit the beginning of the next cycle of the pattern into the remaining 2 beats in the bar, but will also need to 'shift' the pattern on the next cycle, as it has already started its 2nd cycle.
+   - One simple option here is to add rests to the end of the pattern, to make up for the remaining space. This may be desired by the user, allowing the pattern to remain consistent on each cycle, but doesn't take full advantage of the 'interference patterns' which makes Schillinger rhythm theory interesting in practice. The pattern would need the ability to dynamically shift on each cycle, and the app would need to redraw the visual pattern once the playhead reached the end of the sequence.
+   - Similarly, if the user sets a sequence length that is shorter than the total length of the number pattern, the app could handle this either by  truncating that pattern and then beginning again on the next cycle - this is the most straightforward - or again the pattern would need to shift on each cycle of the sequence.
 
 ## Upcoming features :hourglass:
 
