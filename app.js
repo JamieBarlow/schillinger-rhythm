@@ -336,7 +336,8 @@ function sequence(time, beatIndex) {
     console.log(userPatternLength);
     if (cycleCounter === userPatternLength) cycleCounter = 0;
     console.log("beatIndex " + beatIndex);
-    if (beatIndex == userSequenceLength) {
+    // This only applies where the pattern needs to be extended / recycled to fit into a longer
+    if ((userSequenceLength > userPatternLength) && beatIndex == userSequenceLength) {
         console.log('end of sequence')
         cycleCounter++;
         snarePat = recycledUserPtns[cycleCounter];
