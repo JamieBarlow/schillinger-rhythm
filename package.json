@@ -1,0 +1,19 @@
+{
+  "name": "schillinger-rhythm-app",
+  "version": "1.0.0",
+  "description": "<div align=\"center\">\r   <h1>Schillinger Rhythm Generator 🎼:</h1>\r   <strong>By Jamie Barlow</strong>\r </div>",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JamieBarlow/drum-machine.git"
+  },
+  "author": "Jamie Barlow",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JamieBarlow/drum-machine/issues"
+  },
+  "homepage": "https://github.com/JamieBarlow/drum-machine#readme"
+}
