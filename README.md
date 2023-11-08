@@ -16,7 +16,7 @@
   - '4 defines a beat followed by a rest of 3 beat divisions, taking up 4 beat divisions in total;
   - etc.
 - The pattern is translated into a pattern in the app's drum sequencer, an interface which should be familiar to many musicians. This can be edited dynamically by the user to experiment with different patterns, adding or removing beats for each instrument.
-- Once the pattern has been created, the intention of the app is to allow the musician to alter their in a number of interesting and idea-inspiring ways. Schillinger's 'interference patterns' work with symmetry, so the ability to convert a pattern into a symmetrical one is key for this particular approach, alongside further 'preset' tweaking options:
+- Once the pattern has been created, the intention of the app is to allow the musician to alter it in a number of interesting and idea-inspiring ways. Schillinger's 'interference patterns' work with symmetry, so the ability to convert a pattern into a symmetrical one is key for this particular approach, alongside further 'preset' tweaking options, or 'mutations':
   - Rotating the pattern;
   - A 'regen' option to generate an alternative version of the pattern;
   - Changing the instrumentation, i.e. samples;
@@ -41,7 +41,12 @@
 
 ## How to Use :page_with_curl:
 
-- 
+- Add a sequence of numbers to the first field - this represents your rhythm.
+- Select 'irregular' (default) or 'regular' from the dropdown. 'Regular' forces the sequence to an even length even if the generated pattern is an odd/irregular length, so the pulse will continue to follow an even pattern. 'Irregular' (default) preserves an odd pattern length if the generated pattern is odd/irregular, so the pulse will go in and out of phase with your pattern as it cycles through). There is no change if the pattern is already an even length.
+- Select a sequence length (optional) - enter a number defining the length, which can be longer or shorter than the pattern.
+- Click the 'play' button to hear the sequence.
+- Click the grid to add or remove steps as required.
+- Adjust the tempo as desired via the BPM slider.
 
 ## Development Challenges :wrench:
 
@@ -135,12 +140,16 @@
  - Working with user-defined pattern/bar lengths and the sequencer display: this introduces quite a complex variable to the sequencer, which requires it to update dynamically as the sequence plays. 
    - If the sequence length is defined by the user input (default behaviour), this is fairly straightforward - for example, the input '12461' will result in a cycle of 14 beats (1+2+4+6+1 = 14) and the same sequence will simply cycle through with no need to adapt on each repetition. 
    - By contrast, if I apply the same input but set the sequence length to longer, e.g. 16 beats, the sequencer will not only need to fit the beginning of the next cycle of the pattern into the remaining 2 beats in the bar, but will also need to 'shift' the pattern on the next cycle, as it has already started its 2nd cycle.
-   - One simple option here is to add rests to the end of the pattern, to make up for the remaining space. This may be desired by the user, allowing the pattern to remain consistent on each cycle, but doesn't take full advantage of the 'interference patterns' which makes Schillinger rhythm theory interesting in practice. The pattern would need the ability to dynamically shift on each cycle, and the app would need to redraw the visual pattern once the playhead reached the end of the sequence.
-   - Similarly, if the user sets a sequence length that is shorter than the total length of the number pattern, the app could handle this either by  truncating that pattern and then beginning again on the next cycle - this is the most straightforward - or again the pattern would need to shift on each cycle of the sequence.
+   - One simple option here is to add rests to the end of the pattern, to make up for the remaining space. This may be desired by the user, allowing the pattern to remain consistent on each cycle, but doesn't take full advantage of the variation in 'interference patterns' which makes Schillinger rhythm theory interesting in practice. I therefore agreed to implement a solution whereby the pattern itself cycles within the longer sequence. This means that the starting position for the pattern will 'shift' on each cycle of sequence, and the app therefore needs to redraw the visual pattern each time the playhead reached the end of the sequence.
+   - Similarly, if the user sets a sequence length that is shorter than the total length of the number pattern, the app could handle this either by truncating that pattern and then beginning again on the next cycle - this is the most straightforward - or again the pattern would need to shift on each cycle of the sequence.
 
-## Upcoming features :hourglass:
+## Upcoming features and improvements :hourglass:
 
-- 
+- Handling shorter sequences than the user input - currently the display does not refresh;
+- Upgraded UI for added visual appeal;
+- Improved UX, making the app less cluttered and intuitive to use in line with 'common sense' usability principles;
+- Upgraded features including a manual clear/reset button, an auto-refresh on entering a new pattern, and mutations (presets for tweaking the pattern);
+- In consideration: ability to input the number/sequence via barcode scan.
 
 ## License :scroll:
 
