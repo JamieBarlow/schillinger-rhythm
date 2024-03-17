@@ -1,0 +1,37 @@
+div {
+  padding: 10px;
+}
+
+p {
+  margin: 2.5px;
+}
+
+input,
+select {
+  display: block;
+  margin: 10px 0;
+}
+
+button {
+}
+
+#startBtn button {
+  background: lightskyblue;
+  height: 40px;
+  width: 60px;
+}
+
+.sequencer {
+  display: flex;
+  justify-content: flex-start;
+  align-items: space-between;
+  /* border: 1px solid blue; */
+}
+
+.trackLabels {
+  /* height: 200px; */
+}
+
+#sequencerLanes {
+  align-self: flex-start;
+}
