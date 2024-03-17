@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useRef } from "react";
-import p5Min from "p5";
+import p5 from "p5";
 
 // instrument parts
 let bd, snare, hh, pulse; // instrument. This serves as a container that will hold a sound source.
@@ -35,8 +35,9 @@ export default function Sequencer() {
   useEffect(() => {
     // Conditional to prevent multiple canvases being created
     if (!canvasCreated.current) {
-      new p5Min((p) => {
+      new p5((p) => {
         p.setup = () => {
+          //   getAudioContext().suspend();
           sequenceLength = snarePat.length; // determines num of cols. Default 16
           numInstruments = 4;
           cnv = p
