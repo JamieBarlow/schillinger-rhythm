@@ -1,44 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Drum machine</title>
     <script src="app.js"></script>
     <script src="p5.min.js"></script>
     <script src="p5.sound.js"></script>
-    <script src="https://kit.fontawesome.com/762a7ebf5f.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="style.css">
-</head>
+    <script
+      src="https://kit.fontawesome.com/762a7ebf5f.js"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <script defer src="components/Instrument.js"></script>
+    <script defer src="components/Instruments-column.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
+  <body>
     <div>
-        <label for="numInput">Add a number here - this is your rhythm pattern (e.g. 1240652)</label>
-        <input type="number" id="numInput">
-        <label for="metre">Choose a regular or irregular metre ('Regular' forces the sequence to an even length even if the generated pattern is an odd/irregular length, so the pulse will continue to follow an even pattern. 'Irregular' (default) preserves an odd pattern length if the generated pattern is odd/irregular, so the pulse will go in and out of phase with your pattern as it cycles through). There is no change if the pattern is an even length.</label>
-        <select name="metre" id="metre">
-            <option value="irregular">Irregular</option>
-            <option value="regular">Regular</option>
-        </select>
-        <label for="userSequenceLength">Sequence length (Optional - leave blank to let this follow number of beats in user pattern)</label>
-        <input type="number" id="userSequenceLength">
-        <button id="numBtn" onclick="applyRhythm()">Apply Rhythm</button>
+      <label for="numInput"
+        >Add a number here - this is your rhythm pattern (e.g. 1240652)</label
+      >
+      <input type="number" id="numInput" />
+      <label for="metre"
+        >Choose a regular or irregular metre ('Regular' forces the sequence to
+        an even length even if the generated pattern is an odd/irregular length,
+        so the pulse will continue to follow an even pattern. 'Irregular'
+        (default) preserves an odd pattern length if the generated pattern is
+        odd/irregular, so the pulse will go in and out of phase with your
+        pattern as it cycles through). There is no change if the pattern is an
+        even length.</label
+      >
+      <select name="metre" id="metre">
+        <option value="irregular">Irregular</option>
+        <option value="regular">Regular</option>
+      </select>
+      <label for="userSequenceLength"
+        >Sequence length (Optional - leave blank to let this follow number of
+        beats in user pattern)</label
+      >
+      <input type="number" id="userSequenceLength" />
+      <button id="numBtn" onclick="applyRhythm()">Apply Rhythm</button>
     </div>
-    <div id="startBtn"><button><i class="fa-solid fa-play"></i></button></div>
+    <div id="startBtn">
+      <button><i class="fa-solid fa-play"></i></button>
+    </div>
     <div class="sequencer">
-        <div class="trackLabels">
-            <p>Click</p>
-            <p>Snare</p>
-            <p>Hi-hat pulse</p>
-            <p>Bass Drum</p>
-        </div>
-        <div id="sequencerLanes"></div>
+      <instruments-column gap="0">
+        <instrument-card instrument="Click" height="40"></instrument-card>
+        <instrument-card instrument="Snare" height="40"></instrument-card>
+        <instrument-card
+          instrument="Hi-hat pulse"
+          height="40"
+        ></instrument-card>
+        <instrument-card instrument="Bass Drum" height="40"></instrument-card>
+      </instruments-column>
+      <div id="sequencerLanes"></div>
     </div>
     <div id="bpmSlider">
-        <h3 id="bpmValue">BPM 120</h3>
+      <h3 id="bpmValue">BPM 120</h3>
     </div>
-</body>
-
+  </body>
 </html>

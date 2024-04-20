@@ -1,37 +1,39 @@
 div {
-    padding: 10px;
+  padding: 10px;
 }
 
 p {
-    margin: 2.5px;
+  margin: 2.5px;
 }
 
-input, select {
-    display: block;
-    margin: 10px 0;
+input,
+select {
+  display: block;
+  margin: 10px 0;
 }
 
 button {
-    
 }
 
 #startBtn button {
-    background: lightskyblue;
-    height: 40px;
-    width: 60px;
+  background: lightskyblue;
+  height: 40px;
+  width: 60px;
 }
 
 .sequencer {
-    display: flex;
-    justify-content: flex-start;
-    align-items: space-between;
-    /* border: 1px solid blue; */
+  display: flex;
+  align-items: space-around;
+  /* border: 1px solid blue; */
 }
 
 .trackLabels {
-    /* height: 200px; */
+  /* height: 200px; */
 }
 
 #sequencerLanes {
-    align-self: flex-start;
+  box-sizing: border-box;
+  align-self: flex-start;
+  margin: 0;
+  padding: 0;
 }
