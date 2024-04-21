@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="sl-theme-dark">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -20,6 +20,10 @@
     />
     <script defer src="components/Instrument.js"></script>
     <script defer src="components/Instruments-column.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/dark.css"
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
 
@@ -49,8 +53,16 @@
       <input type="number" id="userSequenceLength" />
       <button id="numBtn" onclick="applyRhythm()">Apply Rhythm</button>
     </div>
-    <div id="startBtn">
-      <button><i class="fa-solid fa-play"></i></button>
+    <div class="controls">
+      <sl-button-group label="Alignment">
+        <sl-button id="startBtn" size="medium" pill variant="success"
+          >Play
+          <i class="fa-solid fa-play" slot="prefix"></i>
+        </sl-button>
+        <sl-button id="bpmSlider" size="medium" pill variant="primary">
+          <h3 id="bpmValue">BPM 120</h3>
+        </sl-button>
+      </sl-button-group>
     </div>
     <div class="sequencer">
       <instruments-column gap="0">
@@ -64,8 +76,9 @@
       </instruments-column>
       <div id="sequencerLanes"></div>
     </div>
-    <div id="bpmSlider">
-      <h3 id="bpmValue">BPM 120</h3>
-    </div>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"
+    ></script>
   </body>
 </html>

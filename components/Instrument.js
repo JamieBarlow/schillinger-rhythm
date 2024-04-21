@@ -12,8 +12,7 @@ class Instrument extends HTMLElement {
         <style>
             .instrument {
                 padding: 0 5px;
-                border: 1px solid black;
-                border-radius: 20px;
+                border: 1px solid white;
                 font-family: Poppins, sans-serif;
                 height: ${lineHeight};
                 box-sizing: border-box;

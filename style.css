@@ -1,3 +1,23 @@
+:root {
+  --sl-color-primary-50: var(--sl-color-orange-50);
+  --sl-color-primary-100: var(--sl-color-orange-100);
+  --sl-color-primary-200: var(--sl-color-orange-200);
+  --sl-color-primary-300: var(--sl-color-orange-300);
+  --sl-color-primary-400: var(--sl-color-orange-400);
+  --sl-color-primary-500: var(--sl-color-orange-500);
+  --sl-color-primary-600: var(--sl-color-orange-600);
+  --sl-color-primary-700: var(--sl-color-orange-700);
+  --sl-color-primary-800: var(--sl-color-orange-800);
+  --sl-color-primary-900: var(--sl-color-orange-900);
+  --sl-color-primary-950: var(--sl-color-orange-950);
+}
+
+sl-range {
+  --track-color-active: var(--sl-color-primary-600);
+  --track-color-inactive: var(--sl-color-primary-100);
+  width: 200px;
+}
+
 div {
   padding: 10px;
 }
@@ -15,16 +35,18 @@ select {
 button {
 }
 
-#startBtn button {
-  background: lightskyblue;
-  height: 40px;
-  width: 60px;
+.controls {
+  display: flex;
+  align-items: center;
+  border: 1px solid red;
 }
 
 .sequencer {
   display: flex;
-  align-items: space-around;
-  /* border: 1px solid blue; */
+}
+
+#bpmSlider > * {
+  display: inline;
 }
 
 .trackLabels {

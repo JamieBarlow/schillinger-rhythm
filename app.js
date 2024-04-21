@@ -331,10 +331,12 @@ function startSequence() {
       drums.metro.metroTicks = 0;
       userStartAudio(); // required to ensure Audio Context is enabled via user prompt
       drums.loop();
-      startBtn.firstChild.innerHTML = '<i class="fa-solid fa-stop"></i>';
+      startBtn.innerHTML = 'Stop<i class="fa-solid fa-stop" slot="prefix"></i>';
+      startBtn.variant = "danger";
     } else {
       drums.stop();
-      startBtn.firstChild.innerHTML = '<i class="fa-solid fa-play"></i>';
+      startBtn.innerHTML = 'Play<i class="fa-solid fa-play" slot="prefix"></i>';
+      startBtn.variant = "success";
     }
   } else {
     console.log("Samples have not loaded yet, please wait");
