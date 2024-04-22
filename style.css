@@ -73,7 +73,7 @@ sl-card {
 }
 
 sl-card::part(base) {
-  /* width: 45vw; */
+  min-width: 400px;
 }
 
 sl-card::part(body) {

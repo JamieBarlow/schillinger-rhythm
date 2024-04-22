@@ -59,7 +59,6 @@ let cellWidth;
 let numInstruments;
 let cnv;
 let playhead = [];
-let cursorPos;
 let context;
 let numInput;
 let numBtn;
@@ -73,7 +72,7 @@ let bgStroke = [36, 66, 86];
 let playheadBgColor = [204, 20, 45, 20];
 
 // Patterns: 1 = beat, 0 = rest
-let userPattern = [1, 0, 5, 4, 5];
+let userPattern = [];
 snarePat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 hhPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 pulsePat = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0];
@@ -171,7 +170,6 @@ function draw() {
   strokeWeight(2);
   fill("white");
 
-  cursorPos = 0;
   // Draw column grid lines
   for (let i = 0; i < sequenceLength + 1; i++) {
     // startx, starty, endx, endy
@@ -283,7 +281,7 @@ function applyRhythm() {
   drums.removePhrase("seq");
   createPlayhead();
   drums.addPhrase("seq", sequence, playhead);
-
+  updateCycleDisplay();
   redraw();
   noLoop();
 }
@@ -291,12 +289,12 @@ function applyRhythm() {
 function createPulse() {
   pulsePat = [];
   console.log(sequenceLength);
-  if (isIrregular(sequenceLength) === true) {
+  if (isIrregular(sequenceLength)) {
     const halfBeatLength = Math.floor(sequenceLength / 2);
     for (let i = 0; i < halfBeatLength; i++) {
       pulsePat.push(1, 0);
     }
-    pulsePat.push(1);
+    // pulsePat.push(1);
   } else {
     for (let i = 0; i < sequenceLength / 2; i++) {
       pulsePat.push(1, 0);
@@ -354,22 +352,22 @@ function canvasPressed() {
   let indexClicked = floor((sequenceLength * mouseX) / width);
   if (rowClicked === 0) {
     console.log("first row " + indexClicked);
-    hhPat[indexClicked] = invert(hhPat[indexClicked]);
+    hhPat[indexClicked] = toggle(hhPat[indexClicked]);
   } else if (rowClicked === 1) {
     console.log("second row " + indexClicked);
-    snarePat[indexClicked] = invert(snarePat[indexClicked]);
+    snarePat[indexClicked] = toggle(snarePat[indexClicked]);
   } else if (rowClicked === 2) {
     console.log("third row " + indexClicked);
-    pulsePat[indexClicked] = invert(pulsePat[indexClicked]);
+    pulsePat[indexClicked] = toggle(pulsePat[indexClicked]);
   } else if (rowClicked === 3) {
     console.log("fourth row " + indexClicked);
-    bdPat[indexClicked] = invert(bdPat[indexClicked]);
+    bdPat[indexClicked] = toggle(bdPat[indexClicked]);
   }
   redraw();
 }
 
 // Reverses / toggles the state of a sample - either '1' (active) or '0' (inactive)
-function invert(bitInput) {
+function toggle(bitInput) {
   return bitInput === 1 ? 0 : 1;
 }
 
@@ -385,8 +383,12 @@ function createPlayhead() {
 function sequence(time, beatIndex) {
   console.log(userPatternLength);
   if (cycleCounter === userPatternLength) cycleCounter = 0;
+  if (beatIndex === userPatternLength) {
+    console.log("end!");
+    rotatePtn(pulsePat, 1);
+  }
   console.log("beatIndex " + beatIndex);
-  // This only applies where the pattern needs to be extended / recycled to fit into a longer
+  // This only applies where the pattern needs to be extended / recycled to fit into a longer sequence
   if (
     userSequenceLength > userPatternLength &&
     beatIndex == userSequenceLength
@@ -394,6 +396,7 @@ function sequence(time, beatIndex) {
     console.log("end of sequence");
     cycleCounter++;
     snarePat = recycledUserPtns[cycleCounter];
+    updateCycleDisplay();
     console.log(`cycle counter: ${cycleCounter}`);
   }
   // Synchronising playhead with beat by delaying playhead. By default this is out of sync because the callback runs ahead of the beat
@@ -409,8 +412,7 @@ function drawPlayhead(beatIndex) {
   rect((beatIndex - 1) * cellWidth, 0, cellWidth, height);
 }
 
-/* This function allows you to input an array of numbers to convert to a beat pattern. If you enter the boolean value true for the second argument, 
-the pattern will add an extra beat to create a regular meter */
+/* This function allows you to input an array of numbers to convert to a beat pattern. If you make selectMetre 'true', the pattern will add an extra beat to create a regular meter */
 function convertNumsToPattern(nums, sequenceLength, selectMetre) {
   let cycle1 = [];
   for (let i = 0; i < nums.length; i++) {
@@ -424,7 +426,6 @@ function convertNumsToPattern(nums, sequenceLength, selectMetre) {
   // fills out the remainder of the overall beat if regular metre is selected, so that the cycle restarts on beat loop
   if (selectMetre === "regular" && isIrregular(sequenceLength) === true) {
     sequenceLength++;
-    originalPtn.push(0);
   }
   return originalPtn;
 }
@@ -446,7 +447,7 @@ function isIrregular(sequenceLength) {
   return sequenceLength % 2 !== 0 ? true : false;
 }
 
-// extends the pattern if shorter than the
+// extends the pattern if shorter than the sequence length
 function extendPtn() {
   let originalPtn = snarePat.slice();
   let cycle1 = originalPtn.slice();
@@ -465,7 +466,7 @@ function extendPtn() {
   return cycle1;
 }
 
-// Re-cycles through the pattern if the user sequence length is longer than the length of the user pattern
+// Re-cycles through the pattern if the sequence length is longer than the length of the user pattern
 function recyclePtn(cycle1) {
   let originalPtn = snarePat.slice();
   let remainder = userSequenceLength - userPatternLength;
@@ -493,4 +494,18 @@ function recyclePtn(cycle1) {
   console.log(`remainder: ${remainder}`);
   console.log(`converted output pattern: ${originalPtn}`);
   console.log(recycledUserPtns);
+}
+
+function rotatePtn(nums, k) {
+  for (let i = 0; i < k; i++) {
+    const poppedNum = nums.pop();
+    nums.unshift(poppedNum);
+  }
+}
+
+function updateCycleDisplay() {
+  let cycleDisplay = document.querySelector("#cycleDisplay");
+  cycleDisplay.innerText = `Cycle ${cycleCounter} of ${
+    sequenceLength > userPatternLength ? userPatternLength : 1
+  }`;
 }

@@ -56,8 +56,8 @@
         </sl-tooltip>
       </div>
       <div class="formField">
-        <sl-input id="userSequenceLength" clearable>
-          <p slot="label">Custom sequence length</p>
+        <sl-input id="userSequenceLength" type="number" min="1">
+          <p slot="label">Sequence length (optional)</p>
         </sl-input>
         <sl-tooltip placement="right">
           <sl-icon-button name="patch-question" label="Query"></sl-icon-button>
@@ -73,6 +73,18 @@
         >
       </div>
     </sl-card>
+    <div class="sequencer">
+      <instruments-column gap="0">
+        <instrument-card instrument="Click" height="40"></instrument-card>
+        <instrument-card instrument="Snare" height="40"></instrument-card>
+        <instrument-card
+          instrument="Hi-hat pulse"
+          height="40"
+        ></instrument-card>
+        <instrument-card instrument="Bass Drum" height="40"></instrument-card>
+      </instruments-column>
+      <div id="sequencerLanes"></div>
+    </div>
     <sl-card class="controls">
       <sl-button-group label="Alignment">
         <sl-button id="startBtn" size="large" pill variant="success"
@@ -88,20 +100,9 @@
         >
           <h4 id="bpmValue">BPM 120</h4>
         </sl-button>
+        <sl-button id="cycleDisplay" size="large" pill>Cycle 1 of 1</sl-button>
       </sl-button-group>
     </sl-card>
-    <div class="sequencer">
-      <instruments-column gap="0">
-        <instrument-card instrument="Click" height="40"></instrument-card>
-        <instrument-card instrument="Snare" height="40"></instrument-card>
-        <instrument-card
-          instrument="Hi-hat pulse"
-          height="40"
-        ></instrument-card>
-        <instrument-card instrument="Bass Drum" height="40"></instrument-card>
-      </instruments-column>
-      <div id="sequencerLanes"></div>
-    </div>
     <script
       type="module"
       src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"
