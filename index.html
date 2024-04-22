@@ -28,32 +28,52 @@
   </head>
 
   <body>
-    <div>
-      <label for="numInput"
-        >Add a number here - this is your rhythm pattern (e.g. 1240652)</label
-      >
-      <input type="number" id="numInput" />
-      <label for="metre"
-        >Choose a regular or irregular metre ('Regular' forces the sequence to
-        an even length even if the generated pattern is an odd/irregular length,
-        so the pulse will continue to follow an even pattern. 'Irregular'
-        (default) preserves an odd pattern length if the generated pattern is
-        odd/irregular, so the pulse will go in and out of phase with your
-        pattern as it cycles through). There is no change if the pattern is an
-        even length.</label
-      >
-      <select name="metre" id="metre">
-        <option value="irregular">Irregular</option>
-        <option value="regular">Regular</option>
-      </select>
-      <label for="userSequenceLength"
-        >Sequence length (Optional - leave blank to let this follow number of
-        beats in user pattern)</label
-      >
-      <input type="number" id="userSequenceLength" />
-      <button id="numBtn" onclick="applyRhythm()">Apply Rhythm</button>
-    </div>
-    <div class="controls">
+    <sl-card class="options">
+      <div class="formField">
+        <sl-input id="numInput" clearable help-text="(e.g. 1240652)"
+          ><p slot="label">Add your rhythm pattern</p></sl-input
+        >
+      </div>
+      <div class="formField">
+        <sl-select name="metre" id="metre" value="irregular">
+          <sl-option value="irregular">Irregular</sl-option>
+          <sl-option value="regular">Regular</sl-option>
+          <p slot="label">Choose a regular or irregular metre</p>
+        </sl-select>
+        <sl-tooltip placement="right">
+          <sl-icon-button name="patch-question" label="Query"></sl-icon-button>
+          <p slot="content">
+            <b>'Regular'</b> forces the sequence to an even length even if the
+            entered pattern is an odd/irregular length, so the pulse will
+            continue to follow an even pattern.
+          </p>
+          <p slot="content">
+            <b>'Irregular' (default)</b> preserves an odd pattern length if the
+            generated pattern is odd/irregular, so the pulse will go in and out
+            of phase with your pattern as it cycles through. There is no change
+            if the pattern is an even length.
+          </p>
+        </sl-tooltip>
+      </div>
+      <div class="formField">
+        <sl-input id="userSequenceLength" clearable>
+          <p slot="label">Custom sequence length</p>
+        </sl-input>
+        <sl-tooltip placement="right">
+          <sl-icon-button name="patch-question" label="Query"></sl-icon-button>
+          <p slot="content">
+            (Optional - leave blank to let this follow number of beats in user
+            pattern)
+          </p>
+        </sl-tooltip>
+      </div>
+      <div class="formField" slot="footer">
+        <sl-button id="numBtn" onclick="applyRhythm()" variant="primary"
+          >Apply Rhythm</sl-button
+        >
+      </div>
+    </sl-card>
+    <sl-card class="controls">
       <sl-button-group label="Alignment">
         <sl-button id="startBtn" size="large" pill variant="success"
           >Play
@@ -69,7 +89,7 @@
           <h4 id="bpmValue">BPM 120</h4>
         </sl-button>
       </sl-button-group>
-    </div>
+    </sl-card>
     <div class="sequencer">
       <instruments-column gap="0">
         <instrument-card instrument="Click" height="40"></instrument-card>

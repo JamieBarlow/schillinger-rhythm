@@ -67,6 +67,11 @@ let cycleCounter = 1;
 let recycledUserPtns = [];
 let sqSize = 40;
 
+// RGB / RGBA color values
+let bgColor = [84, 121, 146];
+let bgStroke = [36, 66, 86];
+let playheadBgColor = [204, 20, 45, 20];
+
 // Patterns: 1 = beat, 0 = rest
 let userPattern = [1, 0, 5, 4, 5];
 snarePat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -160,8 +165,9 @@ function draw() {
   resizeCanvas(sqSize * sequenceLength, sqSize * numInstruments);
   cellWidth = width / sequenceLength;
   // createPlayhead();
-  background(80);
-  stroke("gray");
+  colorMode(RGB);
+  background(...bgColor);
+  stroke(...bgStroke);
   strokeWeight(2);
   fill("white");
 
@@ -399,7 +405,7 @@ function sequence(time, beatIndex) {
 
 function drawPlayhead(beatIndex) {
   stroke("red");
-  fill(255, 0, 0, 30);
+  fill(...playheadBgColor);
   rect((beatIndex - 1) * cellWidth, 0, cellWidth, height);
 }
 

@@ -10,12 +10,8 @@
   --sl-color-primary-800: var(--sl-color-sky-800);
   --sl-color-primary-900: var(--sl-color-sky-900);
   --sl-color-primary-950: var(--sl-color-sky-950);
-}
 
-sl-range {
-  --track-color-active: var(--sl-color-primary-600);
-  --track-color-inactive: var(--sl-color-primary-100);
-  width: 200px;
+  font-family: var(--sl-font-sans);
 }
 
 div {
@@ -35,14 +31,28 @@ select {
 button {
 }
 
+.formField {
+  display: flex;
+  padding: 0;
+  margin: var(--sl-spacing-small) 0;
+}
+
+.options {
+  width: 50%;
+}
+
 .controls {
   display: flex;
   align-items: center;
-  border: 1px solid red;
+  /* border: 1px solid red; */
 }
 
 .sequencer {
   display: flex;
+}
+
+#startBtn {
+  min-width: 100px;
 }
 
 #bpmSlider {
@@ -54,9 +64,45 @@ button {
   margin: 0;
 }
 
+#bpmValue {
+  min-width: 70px;
+}
+
+sl-card {
+  margin: var(--sl-spacing-2x-small);
+}
+
+sl-card::part(base) {
+  /* width: 45vw; */
+}
+
+sl-card::part(body) {
+  min-width: 100%;
+}
+
+sl-card::part(footer) {
+  padding: var(--sl-spacing-2x-small) var(--sl-spacing-medium);
+}
+
+sl-range {
+  --track-color-active: var(--sl-color-primary-600);
+  --track-color-inactive: var(--sl-color-primary-100);
+  width: 200px;
+}
+
 .btn--alignedContents::part(label) {
   display: flex;
   gap: 20px;
+}
+
+sl-input::part(base),
+sl-select::part(form-control) {
+  width: 200px;
+}
+
+sl-input::part(form-control-label),
+sl-select::part(form-control-label) {
+  margin: var(--sl-spacing-2x-small) 0;
 }
 
 .trackLabels {
