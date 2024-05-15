@@ -22,7 +22,7 @@ let playhead = [];
 // sequence lengths
 let userPatternLength;
 let userSequenceLength;
-let sequenceLength; // actual length of sequence - determined via userPatternLength or (optionally) userSequenceLength
+let sequenceLength = 16; // actual length of sequence - determined via userPatternLength or (optionally) userSequenceLength
 // recycled patterns
 let cycleCounter = 1;
 let pulseCounter = 0;
@@ -57,7 +57,6 @@ function preload() {
 function setup() {
   // mimics Google autoplay policy
   getAudioContext().suspend();
-
   // Setup track volume sliders
   let volumeSliders = document.querySelectorAll(".volumeSlider");
   for (let slider of volumeSliders) {
@@ -381,8 +380,8 @@ function sequence(time, beatIndex) {
     updateCycleDisplay();
     console.log(`cycle counter: ${cycleCounter}`);
   }
-  // Updating/toggling pulse cycle
-  if (beatIndex === sequenceLength) {
+  // Updating/toggling pulse cycle for irregular patterns (odd length)
+  if (isIrregular(sequenceLength) && beatIndex === sequenceLength) {
     pulseCounter === 0 ? (pulseCounter = 1) : (pulseCounter = 0);
     pulseDisplay = recycledPulse[pulseCounter];
     console.log(`pulse counter: ${pulseCounter}`);
