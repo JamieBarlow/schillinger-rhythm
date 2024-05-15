@@ -1,5 +1,6 @@
 // instrument parts
 let bd, snare, hh, pulse; // instrument. This serves as a container that will hold a sound source.
+let sounds = {};
 let bdDisplay, snareDisplay, hhDisplay, pulseDisplay; // display pattern. These may cycle/update depending on the grid
 let bdPat, snarePat, hhPat, pulsePat; // actual pattern (fixed, may differ from diplay pattern)
 let bdPhrase, snarePhrase, hhPhrase, pulsePhrase; // defines how the pattern is interpreted
@@ -17,7 +18,7 @@ pulsePat = [1, 0, 1, 0];
 // controls and playhead
 let bpmControl;
 let playhead = [];
-let volumeSliders = document.querySelectorAll(".volumeSlider");
+
 // sequence lengths
 let userPatternLength;
 let userSequenceLength;
@@ -49,12 +50,25 @@ function preload() {
   ); // return to this callback later
   bd = loadSound("assets/MPC60/BD Club Pressure MPC60 11.wav", () => {}); // return to this callback later
   pulse = loadSound("assets/DMX/CH Acc DMX 21.wav", () => {});
+  sounds = { hh, snare, pulse, bd };
 }
 
 // p5 sketch setup - runs after preload
 function setup() {
   // mimics Google autoplay policy
   getAudioContext().suspend();
+
+  // Setup track volume sliders
+  let volumeSliders = document.querySelectorAll(".volumeSlider");
+  for (let slider of volumeSliders) {
+    let amplitude = new p5.Amplitude();
+    let sound = slider.getAttribute("sound");
+    amplitude.setInput(sounds[sound]);
+    slider.addEventListener("input", function () {
+      sounds[sound].setVolume(this.value / 100);
+    });
+  }
+
   sequenceLength = snareDisplay.length; // determines num of cols. Default 16
   numInstruments = 4; // determines num of rows
   cnv = createCanvas(sqSize * sequenceLength, sqSize * numInstruments);
