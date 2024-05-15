@@ -1,44 +1,111 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en" class="sl-theme-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Drum machine</title>
     <script src="app.js"></script>
     <script src="p5.min.js"></script>
     <script src="p5.sound.js"></script>
-    <script src="https://kit.fontawesome.com/762a7ebf5f.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="style.css">
-</head>
+    <script
+      src="https://kit.fontawesome.com/762a7ebf5f.js"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <script defer src="components/Instrument.js"></script>
+    <script defer src="components/Instruments-column.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/dark.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
-    <div>
-        <label for="numInput">Add a number here - this is your rhythm pattern (e.g. 1240652)</label>
-        <input type="number" id="numInput">
-        <label for="metre">Choose a regular or irregular metre ('Regular' forces the sequence to an even length even if the generated pattern is an odd/irregular length, so the pulse will continue to follow an even pattern. 'Irregular' (default) preserves an odd pattern length if the generated pattern is odd/irregular, so the pulse will go in and out of phase with your pattern as it cycles through). There is no change if the pattern is an even length.</label>
-        <select name="metre" id="metre">
-            <option value="irregular">Irregular</option>
-            <option value="regular">Regular</option>
-        </select>
-        <label for="userSequenceLength">Sequence length (Optional - leave blank to let this follow number of beats in user pattern)</label>
-        <input type="number" id="userSequenceLength">
-        <button id="numBtn" onclick="applyRhythm()">Apply Rhythm</button>
-    </div>
-    <div id="startBtn"><button><i class="fa-solid fa-play"></i></button></div>
+  <body>
+    <sl-card class="options">
+      <div class="formField">
+        <sl-input id="numInput" clearable help-text="(e.g. 1240652)"
+          ><p slot="label">Add your rhythm pattern</p></sl-input
+        >
+      </div>
+      <div class="formField">
+        <sl-select name="metre" id="metre" value="irregular">
+          <sl-option value="irregular">Irregular</sl-option>
+          <sl-option value="regular">Regular</sl-option>
+          <p slot="label">Choose a regular or irregular metre</p>
+        </sl-select>
+        <sl-tooltip placement="right">
+          <sl-icon-button name="patch-question" label="Query"></sl-icon-button>
+          <p slot="content">
+            <b>'Regular'</b> forces the sequence to an even length even if the
+            entered pattern is an odd/irregular length, so the pulse will
+            continue to follow an even pattern.
+          </p>
+          <p slot="content">
+            <b>'Irregular' (default)</b> preserves an odd pattern length if the
+            generated pattern is odd/irregular, so the pulse will go in and out
+            of phase with your pattern as it cycles through. There is no change
+            if the pattern is an even length.
+          </p>
+        </sl-tooltip>
+      </div>
+      <div class="formField">
+        <sl-input id="userSequenceLength" type="number" min="1">
+          <p slot="label">Sequence length (optional)</p>
+        </sl-input>
+        <sl-tooltip placement="right">
+          <sl-icon-button name="patch-question" label="Query"></sl-icon-button>
+          <p slot="content">
+            (Optional - leave blank to let this follow number of beats in user
+            pattern)
+          </p>
+        </sl-tooltip>
+      </div>
+      <div class="formField" slot="footer">
+        <sl-button id="numBtn" onclick="applyRhythm()" variant="primary"
+          >Apply Rhythm</sl-button
+        >
+      </div>
+    </sl-card>
     <div class="sequencer">
-        <div class="trackLabels">
-            <p>Click</p>
-            <p>Snare</p>
-            <p>Hi-hat pulse</p>
-            <p>Bass Drum</p>
-        </div>
-        <div id="sequencerLanes"></div>
+      <instruments-column gap="0">
+        <instrument-card instrument="Click" height="40"></instrument-card>
+        <instrument-card instrument="Snare" height="40"></instrument-card>
+        <instrument-card
+          instrument="Hi-hat pulse"
+          height="40"
+        ></instrument-card>
+        <instrument-card instrument="Bass Drum" height="40"></instrument-card>
+      </instruments-column>
+      <div id="sequencerLanes"></div>
     </div>
-    <div id="bpmSlider">
-        <h3 id="bpmValue">BPM 120</h3>
-    </div>
-</body>
-
+    <sl-card class="controls">
+      <sl-button-group label="Alignment">
+        <sl-button id="startBtn" size="large" pill variant="success"
+          >Play
+          <i class="fa-solid fa-play" slot="prefix"></i>
+        </sl-button>
+        <sl-button
+          id="bpmSlider"
+          class="btn--alignedContents"
+          size="large"
+          pill
+          variant="default"
+        >
+          <h4 id="bpmValue">BPM 120</h4>
+        </sl-button>
+        <sl-button id="cycleDisplay" size="large" pill>Cycle 1 of 1</sl-button>
+      </sl-button-group>
+    </sl-card>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"
+    ></script>
+  </body>
 </html>

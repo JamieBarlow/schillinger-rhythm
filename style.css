@@ -1,37 +1,117 @@
+:root {
+  --sl-color-primary-50: var(--sl-color-sky-50);
+  --sl-color-primary-100: var(--sl-color-sky-100);
+  --sl-color-primary-200: var(--sl-color-sky-200);
+  --sl-color-primary-300: var(--sl-color-sky-300);
+  --sl-color-primary-400: var(--sl-color-sky-400);
+  --sl-color-primary-500: var(--sl-color-sky-500);
+  --sl-color-primary-600: var(--sl-color-sky-600);
+  --sl-color-primary-700: var(--sl-color-sky-700);
+  --sl-color-primary-800: var(--sl-color-sky-800);
+  --sl-color-primary-900: var(--sl-color-sky-900);
+  --sl-color-primary-950: var(--sl-color-sky-950);
+
+  font-family: var(--sl-font-sans);
+}
+
 div {
-    padding: 10px;
+  padding: 10px;
 }
 
 p {
-    margin: 2.5px;
+  margin: 2.5px;
 }
 
-input, select {
-    display: block;
-    margin: 10px 0;
+input,
+select {
+  display: block;
+  margin: 10px 0;
 }
 
 button {
-    
 }
 
-#startBtn button {
-    background: lightskyblue;
-    height: 40px;
-    width: 60px;
+.formField {
+  display: flex;
+  padding: 0;
+  margin: var(--sl-spacing-small) 0;
+}
+
+.options {
+  width: 50%;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  /* border: 1px solid red; */
 }
 
 .sequencer {
-    display: flex;
-    justify-content: flex-start;
-    align-items: space-between;
-    /* border: 1px solid blue; */
+  display: flex;
+}
+
+#startBtn {
+  min-width: 100px;
+}
+
+#bpmSlider {
+  min-width: 300px;
+}
+
+#bpmSlider > * {
+  display: inline;
+  margin: 0;
+}
+
+#bpmValue {
+  min-width: 70px;
+}
+
+sl-card {
+  margin: var(--sl-spacing-2x-small);
+}
+
+sl-card::part(base) {
+  min-width: 400px;
+}
+
+sl-card::part(body) {
+  min-width: 100%;
+}
+
+sl-card::part(footer) {
+  padding: var(--sl-spacing-2x-small) var(--sl-spacing-medium);
+}
+
+sl-range {
+  --track-color-active: var(--sl-color-primary-600);
+  --track-color-inactive: var(--sl-color-primary-100);
+  width: 200px;
+}
+
+.btn--alignedContents::part(label) {
+  display: flex;
+  gap: 20px;
+}
+
+sl-input::part(base),
+sl-select::part(form-control) {
+  width: 200px;
+}
+
+sl-input::part(form-control-label),
+sl-select::part(form-control-label) {
+  margin: var(--sl-spacing-2x-small) 0;
 }
 
 .trackLabels {
-    /* height: 200px; */
+  /* height: 200px; */
 }
 
 #sequencerLanes {
-    align-self: flex-start;
+  box-sizing: border-box;
+  align-self: flex-start;
+  margin: 0;
+  padding: 0;
 }
