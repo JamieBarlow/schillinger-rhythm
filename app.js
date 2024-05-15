@@ -302,11 +302,19 @@ function createPulse() {
     }
     // Makes up final beat if sequence length is odd/irregular
     pulsePat.push(1);
+    recycledPulse.push(pulsePat);
+    // Adding rotated pulse to cycle through
+    const rotatedPulse = [...pulsePat];
+    rotatePtn(rotatedPulse, 1);
+    rotatedPulse[rotatedPulse.length - 1] = 0; // ensure 1s and 0s continue to alternate
+    recycledPulse.push(rotatedPulse);
+    console.log(recycledPulse);
   } else {
     for (let i = 0; i < sequenceLength / 2; i++) {
       pulsePat.push(1, 0);
     }
   }
+
   return pulsePat;
 }
 
@@ -334,24 +342,7 @@ function startSequence() {
     recyclePtn(cycle1);
   }
   cycleCounter = 1;
-
-  // Create cycles of the pulse if the sequenceLength is odd
-  if (isIrregular(sequenceLength)) {
-    recycledPulse = [];
-    recycledPulse.push(pulsePat);
-
-    let rotatedPulse = [...pulsePat];
-    // rotatedPulse.shift();
-    // rotatedPulse.push(0);
-    rotatedPulse = rotatePtn(rotatedPulse, 1, true);
-    recycledPulse.push(rotatedPulse);
-
-    console.log("recycled pulse");
-    console.log(recycledPulse);
-
-    pulseCounter++;
-    pulsePat = recycledPulse[pulseCounter];
-  }
+  pulseCounter = 0;
 
   context = new AudioContext();
   context.onstatechange = function () {
@@ -408,9 +399,11 @@ function createPlayhead() {
 
 // Runs on each step of the sequence. This is passed in to drums.addPhrase('seq', sequence, playhead)
 function sequence(time, beatIndex) {
-  if (cycleCounter === userPatternLength) cycleCounter = 0;
+  if (cycleCounter === userPatternLength) {
+    cycleCounter = 0;
+  }
   console.log("beatIndex " + beatIndex);
-  // This only applies where the pattern needs to be extended / recycled to fit into a longer sequence
+  // Extending pattern to fit into a longer sequence (if user sets sequence length to longer than pattern)
   if (
     userSequenceLength > userPatternLength &&
     beatIndex == userSequenceLength
@@ -420,6 +413,12 @@ function sequence(time, beatIndex) {
     snarePat = recycledUserPtns[cycleCounter];
     updateCycleDisplay();
     console.log(`cycle counter: ${cycleCounter}`);
+  }
+  // Updating/toggling pulse cycle
+  if (beatIndex === sequenceLength) {
+    pulseCounter === 0 ? (pulseCounter = 1) : (pulseCounter = 0);
+    pulsePat = recycledPulse[pulseCounter];
+    console.log(`pulse counter: ${pulseCounter}`);
   }
   // Synchronising playhead with beat by delaying playhead. By default this is out of sync because the callback runs ahead of the beat
   setTimeout(() => {
@@ -518,15 +517,12 @@ function recyclePtn(cycle1) {
   console.log(recycledUserPtns);
 }
 
-// isPulse optionally ensures the 1s and 0s continue to alternate for e.g. odd-length patterns
-function rotatePtn(nums, byPlaces, isPulse) {
+// Rotates an array 'in place' by a set number of places/rotations
+function rotatePtn(nums, byPlaces) {
   if (nums.length === 0) return nums;
   byPlaces = byPlaces % nums.length; // Handle cases where byPlaces is greater than the array length - no redundant rotations
 
   for (let i = 0; i < byPlaces; i++) {
-    if ((i = 1 && isPulse && isIrregular(sequenceLength))) {
-      nums[nums.length - 1] = 0;
-    }
     const firstElement = nums.shift(); // Remove the first element
     nums.push(firstElement); // Add the first element to the end of the array
   }
