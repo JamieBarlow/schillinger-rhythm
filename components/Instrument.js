@@ -3,6 +3,9 @@ class Instrument extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
   }
+  get instrument() {
+    return this.getAttribute("instrument") || "";
+  }
   connectedCallback() {
     this.render();
   }
@@ -11,10 +14,13 @@ class Instrument extends HTMLElement {
     this.shadowRoot.innerHTML = `
         <style>
             .instrument {
+                display: flex;
+                align-items: center;
                 padding: 0 5px;
                 border: 1px solid hsl(204, 41%, 24%);
                 height: ${lineHeight};
                 box-sizing: border-box;
+                color: white;
             }
             h4 {
                 padding: 5px;
@@ -25,7 +31,8 @@ class Instrument extends HTMLElement {
             }
         </style>
         <div class="instrument">
-            <h4>${this.getAttribute("instrument")}</h4>
+            <h4>${this.instrument}</h4>
+            <slot name="content"></slot>
         </div>
         `;
   }

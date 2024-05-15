@@ -72,6 +72,10 @@ sl-card {
   margin: var(--sl-spacing-2x-small);
 }
 
+sl-card::part(header) {
+  font-size: var(--sl-font-size-x-large);
+}
+
 sl-card::part(base) {
   min-width: 400px;
 }
@@ -85,9 +89,16 @@ sl-card::part(footer) {
 }
 
 sl-range {
+  display: inline-block;
   --track-color-active: var(--sl-color-primary-600);
   --track-color-inactive: var(--sl-color-primary-100);
+  margin: 0 var(--sl-spacing-small);
   width: 200px;
+  --thumb-size: 0.8rem;
+}
+
+sl-icon {
+  font-size: 2rem;
 }
 
 .btn--alignedContents::part(label) {

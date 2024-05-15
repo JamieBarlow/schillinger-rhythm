@@ -29,6 +29,7 @@
 
   <body>
     <sl-card class="options">
+      <div slot="header">Schillinger Rhythm Generator</div>
       <div class="formField">
         <sl-input id="numInput" clearable help-text="(e.g. 1240652)"
           ><p slot="label">Add your rhythm pattern</p></sl-input
@@ -82,6 +83,24 @@
           height="40"
         ></instrument-card>
         <instrument-card instrument="Bass Drum" height="40"></instrument-card>
+      </instruments-column>
+      <instruments-column>
+        <instrument-card height="40"
+          ><sl-icon name="volume-up" slot="content"></sl-icon
+          ><sl-range slot="content" class="volumeSlider"></sl-range
+        ></instrument-card>
+        <instrument-card height="40"
+          ><sl-icon name="volume-up" slot="content"></sl-icon
+          ><sl-range slot="content" class="volumeSlider"></sl-range
+        ></instrument-card>
+        <instrument-card height="40"
+          ><sl-icon name="volume-up" slot="content"></sl-icon
+          ><sl-range slot="content" class="volumeSlider"></sl-range
+        ></instrument-card>
+        <instrument-card height="40"
+          ><sl-icon name="volume-up" slot="content"></sl-icon
+          ><sl-range slot="content" class="volumeSlider"></sl-range
+        ></instrument-card>
       </instruments-column>
       <div id="sequencerLanes"></div>
     </div>

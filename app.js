@@ -14,9 +14,10 @@ pulseDisplay = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0];
 bdDisplay = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 pulsePat = [1, 0, 1, 0];
 
-// playhead and bpm
+// controls and playhead
 let bpmControl;
 let playhead = [];
+let volumeSliders = document.querySelectorAll(".volumeSlider");
 // sequence lengths
 let userPatternLength;
 let userSequenceLength;
