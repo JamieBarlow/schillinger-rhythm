@@ -1,57 +1,19 @@
-// MIDI handling
-
-// navigator.permissions.query({ name: "midi", sysex: true }).then((result) => {
-//     if (result.state === "granted") {
-//       console.log('Access granted');
-//     } else if (result.state === "prompt") {
-//       console.log('Prompt for permission')
-//     }
-//     // console.log('Permission was denied by user prompt or permission policy');
-//   });
-
-// if (navigator.requestMIDIAccess) {
-//     navigator.requestMIDIAccess().then(success, failure);
-// }
-
-// function success(midiAccess) {
-//     console.log(midiAccess);
-//     midiAccess.addEventListener('statechange', updateDevices);
-
-//     const inputs = midiAccess.inputs;
-//     console.log(inputs);
-//     inputs.forEach(input => {
-//         if (input.name !== "Komplete Audio 6 MIDI") {                       // Komplete Audio 6 MIDI logs constant MIDI data, this is excluding that input
-//             input.addEventListener('midimessage', handleInput);
-//         }
-//     })
-// }
-
-// function failure(err) {
-//     console.warn('The Web MIDI API is not supported in this browser', err);
-// }
-
-// // Logs MIDI inputs
-// function handleInput(event) {
-//     if (event.data[2] <= 35) {
-//         document.body.style.backgroundColor = "red";
-//     } else {
-//         document.body.style.backgroundColor = "white";
-//     }
-//     console.log(event);
-// }
-
-// // registers any change to connected MIDI devices
-// function updateDevices(event) {
-//     console.log(event);
-//     console.log(`Name: ${event.port.name}, Brand: ${event.port.manufacturer}, State: ${event.port.state}, Type: ${event.port.type}`);
-// }
-
 // instrument parts
 let bd, snare, hh, pulse; // instrument. This serves as a container that will hold a sound source.
-let bdPat, snarePat, hhPat, pulsePat; // pattern. Will be an array of numbers (1 = on-note, 0 = rest)
+let bdDisplay, snareDisplay, hhDisplay, pulseDisplay; // display pattern. These may cycle/update depending on the grid
+let bdPat, snarePat, hhPat, pulsePat; // actual pattern (fixed, may differ from diplay pattern)
 let bdPhrase, snarePhrase, hhPhrase, pulsePhrase; // defines how the pattern is interpreted
 let drums; // full drum part. We will attach the phrase to the part, which will serve as our transport to drive the phrase.
 let numInput;
+
+// Patterns: 1 = beat, 0 = rest
+let userPattern = [];
+snareDisplay = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+hhDisplay = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+pulseDisplay = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0];
+bdDisplay = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+pulsePat = [1, 0, 1, 0];
+
 // playhead and bpm
 let bpmControl;
 let playhead = [];
@@ -77,13 +39,6 @@ let bgColor = [84, 121, 146];
 let bgStroke = [36, 66, 86];
 let playheadBgColor = [204, 20, 45, 20];
 
-// Patterns: 1 = beat, 0 = rest
-let userPattern = [];
-snarePat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-hhPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-pulsePat = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0];
-bdPat = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
 // Preload runs before setup
 function preload() {
   hh = loadSound("assets/MPC60/CH 909 A MPC60 07.wav", () => {}); // return to this callback later
@@ -99,7 +54,7 @@ function preload() {
 function setup() {
   // mimics Google autoplay policy
   getAudioContext().suspend();
-  sequenceLength = snarePat.length; // determines num of cols. Default 16
+  sequenceLength = snareDisplay.length; // determines num of cols. Default 16
   numInstruments = 4; // determines num of rows
   cnv = createCanvas(sqSize * sequenceLength, sqSize * numInstruments);
   cnv.parent("sequencerLanes");
@@ -112,7 +67,7 @@ function setup() {
       hh.play(time);
       // console.log(time);
     },
-    hhPat
+    hhDisplay
   );
   snarePhrase = new p5.Phrase(
     "snare",
@@ -120,7 +75,7 @@ function setup() {
       snare.play(time);
       // console.log(time);
     },
-    snarePat
+    snareDisplay
   );
   bdPhrase = new p5.Phrase(
     "bd",
@@ -128,7 +83,7 @@ function setup() {
       bd.play(time);
       // console.log(time);
     },
-    bdPat
+    bdDisplay
   );
   pulsePhrase = new p5.Phrase(
     "pulse",
@@ -163,9 +118,9 @@ function setup() {
 
 // Function for drawing sequencer grid. Refreshes each time you click a cell with the canvasPressed() function
 function draw() {
-  let userPtn = snarePat;
+  let userPtn = snareDisplay;
   if (userSequenceLength > userPatternLength) {
-    userPtn = extendPtn(snarePat);
+    userPtn = extendPtn();
   }
   resizeCanvas(sqSize * sequenceLength, sqSize * numInstruments);
   cellWidth = width / sequenceLength;
@@ -194,63 +149,59 @@ function draw() {
   // Drawing circles in column for pattern (updated with canvasPressed() function when user clicks)
   let circleSize = sqSize * 0.45;
   for (let i = 0; i < sequenceLength; i++) {
-    if (hhPat[i] === 1) {
+    if (hhDisplay[i] === 1) {
       ellipse(i * cellWidth + 0.5 * cellWidth, 0.5 * cellWidth, circleSize);
     }
     if (userPtn[i] === 1) {
       ellipse(i * cellWidth + 0.5 * cellWidth, 1.5 * cellWidth, circleSize);
     }
-    if (pulsePat[i] === 1) {
+    if (pulseDisplay[i] === 1) {
       ellipse(i * cellWidth + 0.5 * cellWidth, 2.5 * cellWidth, circleSize);
     }
-    if (bdPat[i] === 1) {
+    if (bdDisplay[i] === 1) {
       ellipse(i * cellWidth + 0.5 * cellWidth, 3.5 * cellWidth, circleSize);
     }
   }
 }
 
-// Converts a pattern of humbers input by the user to 1s and 0s. Called on clicking 'Apply Rhythm' button in browser
-function applyRhythm() {
-  // Select regular or irregular metre
-  const selectMetre = document.querySelector("#metre").value;
-  // Get user input and convert to array (pattern)
+// Set sequenceLength according to either userPatternLength or (optional) user sequence length
+function setSequenceLength() {
   numInput = document.querySelector("#numInput");
   userPattern = Array.from(numInput.value.split(""), Number);
   userPatternLength = userPattern.reduce((a, b) => a + b);
-  // Define beat length either by user pattern (default) or fixed user value
   userSequenceLength = document.querySelector("#userSequenceLength").value;
-
-  console.log(`user defined sequence length: ${userSequenceLength}`);
-  console.log(
-    `user pattern length (including rests if 'regular'): ${userPatternLength}`
-  );
-
   if (!userSequenceLength) {
     sequenceLength = userPatternLength;
   } else {
     sequenceLength = userSequenceLength;
   }
   console.log("Resulting pattern length: " + sequenceLength);
+}
 
-  // Reset current snare phrase and convert to new user phrase
+// Converts a pattern of humbers input by the user to 1s and 0s. Called on clicking 'Apply Rhythm' button in browser
+function applyRhythm() {
+  // Select regular or irregular metre
+  const selectMetre = document.querySelector("#metre").value;
+  setSequenceLength();
+  // Get user input and convert to array (pattern)
   drums.removePhrase("snare");
   let currentPat = convertNumsToPattern(
     userPattern,
     sequenceLength,
     selectMetre
   );
-  snarePat = currentPat;
+  snareDisplay = currentPat;
   snarePhrase = new p5.Phrase(
     "snare",
     (time) => {
       snare.play(time);
     },
-    snarePat
+    snareDisplay
   );
   drums.addPhrase(snarePhrase);
 
   drums.removePhrase("pulse");
-  pulsePat = createPulse();
+  pulseDisplay = createPulse();
   pulsePhrase = new p5.Phrase(
     "pulse",
     (time) => {
@@ -262,24 +213,25 @@ function applyRhythm() {
 
   // Reset other phrases
   drums.removePhrase("bd");
-  bdPat = new Array(sequenceLength).fill(0);
+  console.log(typeof sequenceLength);
+  bdDisplay = new Array(Number(sequenceLength)).fill(0);
   bdPhrase = new p5.Phrase(
     "bd",
     (time) => {
       bd.play(time);
     },
-    bdPat
+    bdDisplay
   );
   drums.addPhrase(bdPhrase);
 
   drums.removePhrase("hh");
-  hhPat = new Array(sequenceLength).fill(0);
+  hhDisplay = new Array(Number(sequenceLength)).fill(0);
   hhPhrase = new p5.Phrase(
     "hh",
     (time) => {
       hh.play(time);
     },
-    hhPat
+    hhDisplay
   );
   drums.addPhrase(hhPhrase);
 
@@ -293,29 +245,29 @@ function applyRhythm() {
 }
 
 function createPulse() {
-  pulsePat = [];
+  pulseDisplay = [];
   console.log(sequenceLength);
   if (isIrregular(sequenceLength)) {
     const halfBeatLength = Math.floor(sequenceLength / 2);
     for (let i = 0; i < halfBeatLength; i++) {
-      pulsePat.push(1, 0);
+      pulseDisplay.push(1, 0);
     }
     // Makes up final beat if sequence length is odd/irregular
-    pulsePat.push(1);
-    recycledPulse.push(pulsePat);
+    pulseDisplay.push(1);
+    recycledPulse.push(pulseDisplay);
     // Adding rotated pulse to cycle through
-    const rotatedPulse = [...pulsePat];
+    const rotatedPulse = [...pulseDisplay];
     rotatePtn(rotatedPulse, 1);
     rotatedPulse[rotatedPulse.length - 1] = 0; // ensure 1s and 0s continue to alternate
     recycledPulse.push(rotatedPulse);
     console.log(recycledPulse);
   } else {
     for (let i = 0; i < sequenceLength / 2; i++) {
-      pulsePat.push(1, 0);
+      pulseDisplay.push(1, 0);
     }
   }
 
-  return pulsePat;
+  return pulseDisplay;
 }
 
 // Toggle drum loop on pressing spacebar
@@ -370,16 +322,16 @@ function canvasPressed() {
   let indexClicked = floor((sequenceLength * mouseX) / width);
   if (rowClicked === 0) {
     console.log("first row " + indexClicked);
-    hhPat[indexClicked] = toggle(hhPat[indexClicked]);
+    hhDisplay[indexClicked] = toggle(hhDisplay[indexClicked]);
   } else if (rowClicked === 1) {
     console.log("second row " + indexClicked);
-    snarePat[indexClicked] = toggle(snarePat[indexClicked]);
+    snareDisplay[indexClicked] = toggle(snareDisplay[indexClicked]);
   } else if (rowClicked === 2) {
     console.log("third row " + indexClicked);
-    pulsePat[indexClicked] = toggle(pulsePat[indexClicked]);
+    pulseDisplay[indexClicked] = toggle(pulseDisplay[indexClicked]);
   } else if (rowClicked === 3) {
     console.log("fourth row " + indexClicked);
-    bdPat[indexClicked] = toggle(bdPat[indexClicked]);
+    bdDisplay[indexClicked] = toggle(bdDisplay[indexClicked]);
   }
   redraw();
 }
@@ -410,14 +362,14 @@ function sequence(time, beatIndex) {
   ) {
     console.log("end of sequence");
     cycleCounter++;
-    snarePat = recycledUserPtns[cycleCounter];
+    snareDisplay = recycledUserPtns[cycleCounter];
     updateCycleDisplay();
     console.log(`cycle counter: ${cycleCounter}`);
   }
   // Updating/toggling pulse cycle
   if (beatIndex === sequenceLength) {
     pulseCounter === 0 ? (pulseCounter = 1) : (pulseCounter = 0);
-    pulsePat = recycledPulse[pulseCounter];
+    pulseDisplay = recycledPulse[pulseCounter];
     console.log(`pulse counter: ${pulseCounter}`);
   }
   // Synchronising playhead with beat by delaying playhead. By default this is out of sync because the callback runs ahead of the beat
@@ -470,17 +422,14 @@ function isIrregular(sequenceLength) {
 
 // extends the pattern if shorter than the sequence length
 function extendPtn() {
-  let originalPtn = snarePat.slice();
+  let originalPtn = snareDisplay.slice();
   let cycle1 = originalPtn.slice();
-  console.log("user sequence length is longer than the pattern");
   let remainder = userSequenceLength - userPatternLength;
-  let toFill = remainder;
   // fill out remainder of sequence
-  for (let i = 0; i < remainder; i++) {
-    if (remainder > originalPtn.length) {
-      console.log("need to repeat this until the sequence is filled!");
+  if (remainder) {
+    for (let i = 0; i < remainder; i++) {
+      cycle1.push(originalPtn[i]);
     }
-    cycle1.push(originalPtn[i]);
   }
   console.log(`original pattern: ${originalPtn}`);
   console.log(`pattern extended to fit sequence length: ${cycle1}`);
@@ -489,7 +438,7 @@ function extendPtn() {
 
 // Re-cycles through the pattern if the sequence length is longer than the length of the user pattern
 function recyclePtn(cycle1) {
-  let originalPtn = snarePat.slice();
+  let originalPtn = snareDisplay.slice();
   let remainder = userSequenceLength - userPatternLength;
   let toFill = remainder;
   // Modify array so that it can be redrawn on each cycle
