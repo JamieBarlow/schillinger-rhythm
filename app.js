@@ -51,20 +51,26 @@ let bd, snare, hh, pulse; // instrument. This serves as a container that will ho
 let bdPat, snarePat, hhPat, pulsePat; // pattern. Will be an array of numbers (1 = on-note, 0 = rest)
 let bdPhrase, snarePhrase, hhPhrase, pulsePhrase; // defines how the pattern is interpreted
 let drums; // full drum part. We will attach the phrase to the part, which will serve as our transport to drive the phrase.
+let numInput;
+// playhead and bpm
 let bpmControl;
+let playhead = [];
+// sequence lengths
 let userPatternLength;
-let sequenceLength;
 let userSequenceLength;
+let sequenceLength; // actual length of sequence - determined via userPatternLength or (optionally) userSequenceLength
+// recycled patterns
+let cycleCounter = 1;
+let pulseCounter = 0;
+let recycledUserPtns = [];
+let recycledPulse = [];
+// canvas
 let cellWidth;
 let numInstruments;
 let cnv;
-let playhead = [];
-let context;
-let numInput;
-let numBtn;
-let cycleCounter = 1;
-let recycledUserPtns = [];
 let sqSize = 40;
+
+let context;
 
 // RGB / RGBA color values
 let bgColor = [84, 121, 146];
@@ -294,7 +300,8 @@ function createPulse() {
     for (let i = 0; i < halfBeatLength; i++) {
       pulsePat.push(1, 0);
     }
-    // pulsePat.push(1);
+    // Makes up final beat if sequence length is odd/irregular
+    pulsePat.push(1);
   } else {
     for (let i = 0; i < sequenceLength / 2; i++) {
       pulsePat.push(1, 0);
@@ -320,12 +327,32 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // Play audio on user prompt
 function startSequence() {
+  // Create cycles of user pattern if the overall sequence length is longer
   if (userSequenceLength > userPatternLength) {
     recycledUserPtns = [[]];
     let cycle1 = extendPtn();
     recyclePtn(cycle1);
   }
   cycleCounter = 1;
+
+  // Create cycles of the pulse if the sequenceLength is odd
+  if (isIrregular(sequenceLength)) {
+    recycledPulse = [];
+    recycledPulse.push(pulsePat);
+
+    let rotatedPulse = [...pulsePat];
+    // rotatedPulse.shift();
+    // rotatedPulse.push(0);
+    rotatedPulse = rotatePtn(rotatedPulse, 1, true);
+    recycledPulse.push(rotatedPulse);
+
+    console.log("recycled pulse");
+    console.log(recycledPulse);
+
+    pulseCounter++;
+    pulsePat = recycledPulse[pulseCounter];
+  }
+
   context = new AudioContext();
   context.onstatechange = function () {
     console.log(context.state);
@@ -381,12 +408,7 @@ function createPlayhead() {
 
 // Runs on each step of the sequence. This is passed in to drums.addPhrase('seq', sequence, playhead)
 function sequence(time, beatIndex) {
-  console.log(userPatternLength);
   if (cycleCounter === userPatternLength) cycleCounter = 0;
-  if (beatIndex === userPatternLength) {
-    console.log("end!");
-    rotatePtn(pulsePat, 1);
-  }
   console.log("beatIndex " + beatIndex);
   // This only applies where the pattern needs to be extended / recycled to fit into a longer sequence
   if (
@@ -496,11 +518,19 @@ function recyclePtn(cycle1) {
   console.log(recycledUserPtns);
 }
 
-function rotatePtn(nums, k) {
-  for (let i = 0; i < k; i++) {
-    const poppedNum = nums.pop();
-    nums.unshift(poppedNum);
+// isPulse optionally ensures the 1s and 0s continue to alternate for e.g. odd-length patterns
+function rotatePtn(nums, byPlaces, isPulse) {
+  if (nums.length === 0) return nums;
+  byPlaces = byPlaces % nums.length; // Handle cases where byPlaces is greater than the array length - no redundant rotations
+
+  for (let i = 0; i < byPlaces; i++) {
+    if ((i = 1 && isPulse && isIrregular(sequenceLength))) {
+      nums[nums.length - 1] = 0;
+    }
+    const firstElement = nums.shift(); // Remove the first element
+    nums.push(firstElement); // Add the first element to the end of the array
   }
+  return nums;
 }
 
 function updateCycleDisplay() {
