@@ -59,12 +59,25 @@ function setup() {
   getAudioContext().suspend();
   // Setup track volume sliders
   let volumeSliders = document.querySelectorAll(".volumeSlider");
-  for (let slider of volumeSliders) {
+  let volumeIcons = document.querySelectorAll('sl-icon[name="volume-up"]');
+  for (let i = 0; i < volumeSliders.length; i++) {
     let amplitude = new p5.Amplitude();
-    let sound = slider.getAttribute("sound");
+    let sound = volumeSliders[i].getAttribute("sound");
     amplitude.setInput(sounds[sound]);
-    slider.addEventListener("input", function () {
+    volumeSliders[i].addEventListener("input", function () {
       sounds[sound].setVolume(this.value / 100);
+    });
+    let muteBtn = volumeIcons[i];
+    muteBtn.addEventListener("click", () => {
+      if (muteBtn.getAttribute("name") === "volume-up") {
+        muteBtn.setAttribute("name", "volume-mute");
+        sounds[sound].setVolume(0);
+        volumeSliders[i].value = 0;
+      } else {
+        muteBtn.setAttribute("name", "volume-up");
+        sounds[sound].setVolume(0.8);
+        volumeSliders[i].value = 80;
+      }
     });
   }
 
