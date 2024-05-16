@@ -57,88 +57,11 @@ function preload() {
 function setup() {
   // mimics Google autoplay policy
   getAudioContext().suspend();
-  // Setup track volume sliders
-  let volumeSliders = document.querySelectorAll(".volumeSlider");
-  let volumeIcons = document.querySelectorAll('sl-icon[name="volume-up"]');
-  for (let i = 0; i < volumeSliders.length; i++) {
-    let amplitude = new p5.Amplitude();
-    let sound = volumeSliders[i].getAttribute("sound");
-    amplitude.setInput(sounds[sound]);
-    volumeSliders[i].addEventListener("input", function () {
-      sounds[sound].setVolume(this.value / 100);
-    });
-    let muteBtn = volumeIcons[i];
-    muteBtn.addEventListener("click", () => {
-      if (muteBtn.getAttribute("name") === "volume-up") {
-        muteBtn.setAttribute("name", "volume-mute");
-        sounds[sound].setVolume(0);
-        volumeSliders[i].value = 0;
-      } else {
-        muteBtn.setAttribute("name", "volume-up");
-        sounds[sound].setVolume(0.8);
-        volumeSliders[i].value = 80;
-      }
-    });
-  }
-
-  sequenceLength = snareDisplay.length; // determines num of cols. Default 16
-  numInstruments = 4; // determines num of rows
-  cnv = createCanvas(sqSize * sequenceLength, sqSize * numInstruments);
-  cnv.parent("sequencerLanes");
-  cnv.mousePressed(canvasPressed);
-
+  setupVolumeControls();
+  setupCanvas();
   createPlayhead();
-  hhPhrase = new p5.Phrase(
-    "hh",
-    (time) => {
-      hh.play(time);
-      // console.log(time);
-    },
-    hhDisplay
-  );
-  snarePhrase = new p5.Phrase(
-    "snare",
-    (time) => {
-      snare.play(time);
-      // console.log(time);
-    },
-    snareDisplay
-  );
-  bdPhrase = new p5.Phrase(
-    "bd",
-    (time) => {
-      bd.play(time);
-      // console.log(time);
-    },
-    bdDisplay
-  );
-  pulsePhrase = new p5.Phrase(
-    "pulse",
-    (time) => {
-      pulse.play(time);
-      // console.log(time);
-    },
-    pulsePat
-  );
-
-  drums = new p5.Part();
-  drums.addPhrase(hhPhrase);
-  drums.addPhrase(snarePhrase);
-  drums.addPhrase(pulsePhrase);
-  drums.addPhrase(bdPhrase);
-  drums.addPhrase("seq", sequence, playhead);
-
-  //BPM slider
-  // bpmControl.position(10, 120);
-  drums.setBPM("120");
-  bpmControl = createSlider(30, 300, 120, 1);
-  bpmControl.parent("bpmSlider");
-  let bpmValue = document.querySelector("#bpmValue");
-  bpmControl.input(() => {
-    drums.setBPM(bpmControl.value());
-    bpmValue.innerText = "BPM " + bpmControl.value();
-  });
-
+  setupDrumPart();
+  setupBPMControl();
   noLoop(); // draw() runs once only after this on setup, unless triggered with redraw()
   // redraw();
 }
@@ -191,6 +114,98 @@ function draw() {
   }
 }
 
+function setupCanvas() {
+  sequenceLength = snareDisplay.length; // determines num of cols. Default 16
+  numInstruments = 4; // determines num of rows
+  cnv = createCanvas(sqSize * sequenceLength, sqSize * numInstruments);
+  cnv.parent("sequencerLanes");
+  cnv.mousePressed(canvasPressed);
+}
+
+function setupBPMControl() {
+  //BPM slider
+  drums.setBPM("120");
+  bpmControl = createSlider(30, 300, 120, 1);
+  bpmControl.parent("bpmSlider");
+  let bpmValue = document.querySelector("#bpmValue");
+  bpmControl.input(() => {
+    drums.setBPM(bpmControl.value());
+    bpmValue.innerText = "BPM " + bpmControl.value();
+  });
+}
+
+function setupVolumeControls() {
+  // Setup track volume sliders
+  let volumeSliders = document.querySelectorAll(".volumeSlider");
+  let volumeIcons = document.querySelectorAll('sl-icon[name="volume-up"]');
+  for (let i = 0; i < volumeSliders.length; i++) {
+    let amplitude = new p5.Amplitude();
+    let sound = volumeSliders[i].getAttribute("sound");
+    amplitude.setInput(sounds[sound]);
+    volumeSliders[i].addEventListener("input", function () {
+      sounds[sound].setVolume(this.value / 100);
+    });
+    // Setup mute buttons
+    let muteBtn = volumeIcons[i];
+    muteBtn.addEventListener("click", () => {
+      if (muteBtn.getAttribute("name") === "volume-up") {
+        muteBtn.setAttribute("name", "volume-mute");
+        sounds[sound].setVolume(0);
+        volumeSliders[i].value = 0;
+      } else {
+        muteBtn.setAttribute("name", "volume-up");
+        sounds[sound].setVolume(0.8);
+        volumeSliders[i].value = 80;
+      }
+    });
+  }
+}
+
+function setupDrumPart() {
+  addPhrases();
+  drums = new p5.Part();
+  drums.addPhrase(hhPhrase);
+  drums.addPhrase(snarePhrase);
+  drums.addPhrase(pulsePhrase);
+  drums.addPhrase(bdPhrase);
+  drums.addPhrase("seq", sequence, playhead);
+}
+
+function addPhrases() {
+  hhPhrase = new p5.Phrase(
+    "hh",
+    (time) => {
+      hh.play(time);
+      // console.log(time);
+    },
+    hhDisplay
+  );
+  snarePhrase = new p5.Phrase(
+    "snare",
+    (time) => {
+      snare.play(time);
+      // console.log(time);
+    },
+    snareDisplay
+  );
+  bdPhrase = new p5.Phrase(
+    "bd",
+    (time) => {
+      bd.play(time);
+      // console.log(time);
+    },
+    bdDisplay
+  );
+  pulsePhrase = new p5.Phrase(
+    "pulse",
+    (time) => {
+      pulse.play(time);
+      // console.log(time);
+    },
+    pulsePat
+  );
+}
+
 // Set sequenceLength according to either userPatternLength or (optional) user sequence length
 function setSequenceLength() {
   numInput = document.querySelector("#numInput");
@@ -210,56 +225,25 @@ function applyRhythm() {
   // Select regular or irregular metre
   const selectMetre = document.querySelector("#metre").value;
   setSequenceLength();
-  // Get user input and convert to array (pattern)
-  drums.removePhrase("snare");
+  // Reset phrases
+  let soundsArray = Object.keys(sounds);
+  for (let sound of soundsArray) {
+    drums.removePhrase(sound);
+  }
+  // Update patterns based on user input
   let currentPat = convertNumsToPattern(
     userPattern,
     sequenceLength,
     selectMetre
   );
   snareDisplay = currentPat;
-  snarePhrase = new p5.Phrase(
-    "snare",
-    (time) => {
-      snare.play(time);
-    },
-    snareDisplay
-  );
-  drums.addPhrase(snarePhrase);
-
-  drums.removePhrase("pulse");
   pulseDisplay = createPulse();
-  pulsePhrase = new p5.Phrase(
-    "pulse",
-    (time) => {
-      pulse.play(time);
-    },
-    pulsePat
-  );
-  drums.addPhrase(pulsePhrase);
-
-  // Reset other phrases
-  drums.removePhrase("bd");
-  console.log(typeof sequenceLength);
   bdDisplay = new Array(Number(sequenceLength)).fill(0);
-  bdPhrase = new p5.Phrase(
-    "bd",
-    (time) => {
-      bd.play(time);
-    },
-    bdDisplay
-  );
-  drums.addPhrase(bdPhrase);
-
-  drums.removePhrase("hh");
   hhDisplay = new Array(Number(sequenceLength)).fill(0);
-  hhPhrase = new p5.Phrase(
-    "hh",
-    (time) => {
-      hh.play(time);
-    },
-    hhDisplay
-  );
+  addPhrases();
+  drums.addPhrase(snarePhrase);
+  drums.addPhrase(pulsePhrase);
+  drums.addPhrase(bdPhrase);
   drums.addPhrase(hhPhrase);
 
   // Reset Playhead to account for change of pattern length
